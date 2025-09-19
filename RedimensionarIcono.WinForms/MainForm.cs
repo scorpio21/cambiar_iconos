@@ -13,6 +13,7 @@ namespace RedimensionarIcono.WinForms
         private Bitmap? _lastResized;
         private readonly int[] _sizes = new[] { 16, 20, 24, 32, 36, 48, 72, 96, 120, 144, 152, 167, 180, 192, 256, 384, 512 };
         private Color _bgColor = Color.White;
+        private Bitmap? _checkerBg;
 
         public MainForm()
         {
@@ -22,6 +23,10 @@ namespace RedimensionarIcono.WinForms
             cbSize.SelectedIndex = Array.IndexOf(_sizes, 192);
             // Formatos
             UpdateFormatOptions();
+            // Fondo checker para visualizar transparencia
+            ApplyCheckerBackground();
+            // Reorganizar layout en pasos con TableLayoutPanel
+            SetupLayout();
             ToggleActions(false);
         }
 
@@ -253,6 +258,123 @@ namespace RedimensionarIcono.WinForms
             }
             var idx = cbFormat.Items.IndexOf(current);
             cbFormat.SelectedIndex = idx >= 0 ? idx : 0;
+        }
+
+        // Fondo de tablero (checker) para visualizar transparencia en previews
+        private void ApplyCheckerBackground()
+        {
+            _checkerBg?.Dispose();
+            int cell = 8;
+            int size = cell * 2;
+            var c1 = Color.FromArgb(230, 230, 230);
+            var c2 = Color.FromArgb(200, 200, 200);
+            _checkerBg = new Bitmap(size, size, PixelFormat.Format32bppArgb);
+            using (var g = Graphics.FromImage(_checkerBg))
+            using (var b1 = new SolidBrush(c1))
+            using (var b2 = new SolidBrush(c2))
+            {
+                g.FillRectangle(b1, 0, 0, cell, cell);
+                g.FillRectangle(b2, cell, 0, cell, cell);
+                g.FillRectangle(b2, 0, cell, cell, cell);
+                g.FillRectangle(b1, cell, cell, cell, cell);
+            }
+            pbPreview.BackgroundImage = _checkerBg;
+            pbMobile.BackgroundImage = _checkerBg;
+        }
+
+        // Reorganiza controles dentro de los GroupBox con TableLayoutPanel
+        private void SetupLayout()
+        {
+            // Paso 1: Cargar + Preview
+            var tlp1 = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 2,
+                Padding = new Padding(8),
+                AutoSize = false
+            };
+            tlp1.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tlp1.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            btnLoad.Margin = new Padding(0, 0, 0, 8);
+            pbPreview.Dock = DockStyle.Fill;
+            tlp1.Controls.Add(btnLoad, 0, 0);
+            tlp1.Controls.Add(pbPreview, 0, 1);
+            gbPaso1.Controls.Clear();
+            gbPaso1.Controls.Add(tlp1);
+
+            // Paso 2: Configuración + Vista móvil
+            var tlp2 = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 7,
+                Padding = new Padding(8),
+                AutoSize = false
+            };
+            tlp2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45));
+            tlp2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55));
+            for (int i = 0; i < 7; i++) tlp2.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+            // Fila 0: Nombre base
+            lblBase.Margin = new Padding(0, 6, 8, 6);
+            txtBase.Margin = new Padding(0, 4, 0, 4);
+            tlp2.Controls.Add(lblBase, 0, 0);
+            tlp2.Controls.Add(txtBase, 1, 0);
+
+            // Fila 1: Tamaño
+            lblSize.Margin = new Padding(0, 6, 8, 6);
+            cbSize.Margin = new Padding(0, 4, 0, 4);
+            tlp2.Controls.Add(lblSize, 0, 1);
+            tlp2.Controls.Add(cbSize, 1, 1);
+
+            // Fila 2: Fondo (Color + panel + Transparente)
+            var pnlFondo = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, FlowDirection = FlowDirection.LeftToRight, WrapContents = false };
+            btnPickColor.Margin = new Padding(0, 0, 6, 0);
+            pnlColor.Margin = new Padding(0, 0, 12, 0);
+            chkTransparent.Margin = new Padding(0, 6, 0, 0);
+            pnlFondo.Controls.Add(btnPickColor);
+            pnlFondo.Controls.Add(pnlColor);
+            pnlFondo.Controls.Add(chkTransparent);
+            lblBg.Margin = new Padding(0, 6, 8, 6);
+            tlp2.Controls.Add(lblBg, 0, 2);
+            tlp2.Controls.Add(pnlFondo, 1, 2);
+
+            // Fila 3: Formato
+            lblFormat.Margin = new Padding(0, 6, 8, 6);
+            cbFormat.Margin = new Padding(0, 4, 0, 4);
+            tlp2.Controls.Add(lblFormat, 0, 3);
+            tlp2.Controls.Add(cbFormat, 1, 3);
+
+            // Fila 4: Acciones 1 (Redimensionar, Guardar)
+            var pnlAcciones1 = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, FlowDirection = FlowDirection.LeftToRight, WrapContents = false };
+            btnResize.Margin = new Padding(0, 0, 8, 0);
+            btnSaveOne.Margin = new Padding(0, 0, 0, 0);
+            pnlAcciones1.Controls.Add(btnResize);
+            pnlAcciones1.Controls.Add(btnSaveOne);
+            tlp2.Controls.Add(new Label(), 0, 4); // vacío para alinear
+            tlp2.Controls.Add(pnlAcciones1, 1, 4);
+
+            // Fila 5: Acciones 2 (Guardar básicos, ICO multi)
+            var pnlAcciones2 = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, FlowDirection = FlowDirection.LeftToRight, WrapContents = false };
+            btnSaveBasics.Margin = new Padding(0, 0, 8, 0);
+            btnSaveIcoMulti.Margin = new Padding(0, 0, 0, 0);
+            pnlAcciones2.Controls.Add(btnSaveBasics);
+            pnlAcciones2.Controls.Add(btnSaveIcoMulti);
+            tlp2.Controls.Add(new Label(), 0, 5);
+            tlp2.Controls.Add(pnlAcciones2, 1, 5);
+
+            // Fila 6: Vista móvil
+            var pnlMobile = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, FlowDirection = FlowDirection.LeftToRight, WrapContents = false };
+            lblMobile.Margin = new Padding(0, 6, 12, 6);
+            pbMobile.Margin = new Padding(0, 0, 0, 0);
+            pnlMobile.Controls.Add(lblMobile);
+            pnlMobile.Controls.Add(pbMobile);
+            tlp2.SetColumnSpan(pnlMobile, 2);
+            tlp2.Controls.Add(pnlMobile, 0, 6);
+
+            gbPaso2.Controls.Clear();
+            gbPaso2.Controls.Add(tlp2);
         }
 
         // Guardar un ICO de un solo tamaño usando HICON

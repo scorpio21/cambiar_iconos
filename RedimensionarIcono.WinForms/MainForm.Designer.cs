@@ -40,6 +40,8 @@ namespace RedimensionarIcono.WinForms
             this.txtManifest = new TextBox();
             this.btnGenManifest = new Button();
             this.btnCopyManifest = new Button();
+            this.gbPaso1 = new GroupBox();
+            this.gbPaso2 = new GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.pbPreview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbMobile)).BeginInit();
             this.SuspendLayout();
@@ -61,6 +63,7 @@ namespace RedimensionarIcono.WinForms
             this.pbPreview.Size = new Size(300, 300);
             this.pbPreview.SizeMode = PictureBoxSizeMode.Zoom;
             this.pbPreview.AllowDrop = true;
+            this.pbPreview.BackgroundImageLayout = ImageLayout.Tile;
             this.pbPreview.DragEnter += new DragEventHandler(this.MainForm_DragEnter);
             this.pbPreview.DragDrop += new DragEventHandler(this.MainForm_DragDrop);
             //
@@ -122,6 +125,10 @@ namespace RedimensionarIcono.WinForms
             this.btnResize.Location = new Point(340, 240);
             this.btnResize.Size = new Size(120, 36);
             this.btnResize.Text = "Redimensionar";
+            this.btnResize.FlatStyle = FlatStyle.Flat;
+            this.btnResize.BackColor = Color.FromArgb(255, 0, 0);
+            this.btnResize.ForeColor = Color.White;
+            this.btnResize.UseVisualStyleBackColor = false;
             this.btnResize.Click += new System.EventHandler(this.btnResize_Click);
             //
             // btnSaveOne
@@ -129,6 +136,7 @@ namespace RedimensionarIcono.WinForms
             this.btnSaveOne.Location = new Point(470, 240);
             this.btnSaveOne.Size = new Size(120, 36);
             this.btnSaveOne.Text = "Guardar";
+            this.btnSaveOne.FlatStyle = FlatStyle.Standard;
             this.btnSaveOne.Click += new System.EventHandler(this.btnSaveOne_Click);
             //
             // btnSaveBasics
@@ -136,6 +144,10 @@ namespace RedimensionarIcono.WinForms
             this.btnSaveBasics.Location = new Point(340, 285);
             this.btnSaveBasics.Size = new Size(250, 36);
             this.btnSaveBasics.Text = "Guardar básicos";
+            this.btnSaveBasics.FlatStyle = FlatStyle.Flat;
+            this.btnSaveBasics.BackColor = Color.FromArgb(255, 0, 0);
+            this.btnSaveBasics.ForeColor = Color.White;
+            this.btnSaveBasics.UseVisualStyleBackColor = false;
             this.btnSaveBasics.Click += new System.EventHandler(this.btnSaveBasics_Click);
 
             // lblBase
@@ -164,6 +176,7 @@ namespace RedimensionarIcono.WinForms
             this.pbMobile.Name = "pbMobile";
             this.pbMobile.Size = new Size(96, 96);
             this.pbMobile.SizeMode = PictureBoxSizeMode.Zoom;
+            this.pbMobile.BackgroundImageLayout = ImageLayout.Tile;
 
             // lblManifest
             this.lblManifest.AutoSize = true;
@@ -188,6 +201,16 @@ namespace RedimensionarIcono.WinForms
             this.btnCopyManifest.Size = new Size(150, 32);
             this.btnCopyManifest.Text = "Copiar JSON";
             this.btnCopyManifest.Click += new System.EventHandler(this.btnCopyManifest_Click);
+
+            // gbPaso1 (visual)
+            this.gbPaso1.Text = "Paso 1: Seleccionar imagen";
+            this.gbPaso1.Location = new Point(12, 8);
+            this.gbPaso1.Size = new Size(330, 372);
+
+            // gbPaso2 (visual)
+            this.gbPaso2.Text = "Paso 2: Configurar icono";
+            this.gbPaso2.Location = new Point(330, 8);
+            this.gbPaso2.Size = new Size(278, 372);
             //
             // MainForm
             //
@@ -197,6 +220,8 @@ namespace RedimensionarIcono.WinForms
             this.AllowDrop = true;
             this.DragEnter += new DragEventHandler(this.MainForm_DragEnter);
             this.DragDrop += new DragEventHandler(this.MainForm_DragDrop);
+            this.Controls.Add(this.gbPaso1);
+            this.Controls.Add(this.gbPaso2);
             this.Controls.Add(this.lblBase);
             this.Controls.Add(this.txtBase);
             this.Controls.Add(this.btnSaveIcoMulti);
@@ -243,6 +268,8 @@ namespace RedimensionarIcono.WinForms
         private Button btnSaveBasics;
         private ComboBox cbFormat;
         private Label lblFormat;
+        private GroupBox gbPaso1;
+        private GroupBox gbPaso2;
         private Label lblBase;
         private TextBox txtBase;
         private Button btnSaveIcoMulti;
