@@ -21,7 +21,10 @@ namespace RedimensionarIcono.WinForms
             cbSize.Items.AddRange(_sizes.Select(s => (object)$"{s}x{s}").ToArray());
             cbSize.SelectedIndex = Array.IndexOf(_sizes, 192);
             // Formatos
-            cbFormat.Items.AddRange(new object[] { "PNG", "JPG" });
+            if (cbFormat.Items.Count == 0)
+            {
+                cbFormat.Items.AddRange(new object[] { "PNG", "JPG", "ICO" });
+            }
             cbFormat.SelectedIndex = 0;
             ToggleActions(false);
         }
@@ -52,6 +55,13 @@ namespace RedimensionarIcono.WinForms
                     using var loaded = new Bitmap(dlg.FileName);
                     _original = new Bitmap(loaded);
                     pbPreview.Image = new Bitmap(_original);
+                    // Sugerir nombre base desde archivo
+                    try
+                    {
+                        var baseName = Path.GetFileNameWithoutExtension(dlg.FileName) ?? "icon";
+                        txtBase.Text = baseName;
+                    }
+                    catch { /* ignore */ }
                     ToggleActions(true);
                 }
                 catch (Exception ex)
@@ -86,6 +96,9 @@ namespace RedimensionarIcono.WinForms
                 _lastResized = Redimensionar(_original, size, size, transparent ? (Color?)null : _bgColor);
                 pbPreview.Image = new Bitmap(_lastResized);
                 btnSaveOne.Enabled = true;
+                // Vista móvil (96x96)
+                using var mobile = Redimensionar(_original, 96, 96, transparent ? (Color?)null : _bgColor);
+                pbMobile.Image = new Bitmap(mobile);
             }
             catch (Exception ex)
             {
@@ -104,16 +117,24 @@ namespace RedimensionarIcono.WinForms
             var fmtName = (cbFormat.SelectedItem?.ToString() ?? "PNG").ToUpperInvariant();
             var transparent = chkTransparent.Checked;
             // Forzar PNG si transparente
-            if (transparent) fmtName = "PNG";
+            if (transparent && fmtName != "ICO") fmtName = "PNG";
+            var baseName = string.IsNullOrWhiteSpace(txtBase.Text) ? $"icon" : SanitizeBase(txtBase.Text);
             using var dlg = new SaveFileDialog
             {
                 Title = "Guardar icono",
-                FileName = $"icon-{size}x{size}.{(fmtName == "PNG" ? "png" : "jpg")}",
-                Filter = fmtName == "PNG" ? "PNG (*.png)|*.png" : "JPG (*.jpg)|*.jpg"
+                FileName = $"{baseName}-{size}x{size}.{(fmtName == "PNG" ? "png" : fmtName == "JPG" ? "jpg" : "ico")}",
+                Filter = fmtName == "PNG" ? "PNG (*.png)|*.png" : (fmtName == "JPG" ? "JPG (*.jpg)|*.jpg" : "ICO (*.ico)|*.ico")
             };
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                GuardarBitmap(_lastResized, dlg.FileName, fmtName);
+                if (fmtName == "ICO")
+                {
+                    GuardarComoIco(_lastResized, dlg.FileName);
+                }
+                else
+                {
+                    GuardarBitmap(_lastResized, dlg.FileName, fmtName);
+                }
                 MessageBox.Show(this, "Imagen guardada.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -129,14 +150,15 @@ namespace RedimensionarIcono.WinForms
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 var transparent = chkTransparent.Checked;
+                var baseName = string.IsNullOrWhiteSpace(txtBase.Text) ? "icon" : SanitizeBase(txtBase.Text);
                 var basics = new (int size, string name)[] {
-                    (16, "favicon-16x16"),
-                    (20, "icon-20x20"),
-                    (24, "icon-24x24"),
-                    (32, "favicon-32x32"),
-                    (180, "apple-touch-icon"),
-                    (192, "icon-192x192"),
-                    (512, "icon-512x512")
+                    (16, $"{baseName}-16x16"),
+                    (20, $"{baseName}-20x20"),
+                    (24, $"{baseName}-24x24"),
+                    (32, $"{baseName}-32x32"),
+                    (180, $"{baseName}-180x180"),
+                    (192, $"{baseName}-192x192"),
+                    (512, $"{baseName}-512x512")
                 };
                 foreach (var b in basics)
                 {
@@ -146,6 +168,18 @@ namespace RedimensionarIcono.WinForms
                 }
                 MessageBox.Show(this, "Básicos guardados.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+        }
+
+        private string SanitizeBase(string input)
+        {
+            var s = input.Normalize().ToLowerInvariant();
+            var invalid = Path.GetInvalidFileNameChars();
+            s = new string(s.Select(c => invalid.Contains(c) ? '-' : c).ToArray());
+            s = System.Text.RegularExpressions.Regex.Replace(s, "[^a-z0-9-_]", "-");
+            s = System.Text.RegularExpressions.Regex.Replace(s, "-+", "-");
+            s = s.Trim('-','_');
+            if (string.IsNullOrEmpty(s)) s = "icon";
+            return s;
         }
 
         private int GetSelectedSize()
@@ -205,6 +239,14 @@ namespace RedimensionarIcono.WinForms
             }
         }
 
+        // Guardar un ICO de un solo tamaño usando HICON
+        private static void GuardarComoIco(Bitmap bmp, string path)
+        {
+            using var icon = Icon.FromHandle(bmp.GetHicon());
+            using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
+            icon.Save(fs);
+        }
+
         // --- Drag & Drop ---
         private void MainForm_DragEnter(object? sender, DragEventArgs e)
         {
@@ -250,6 +292,113 @@ namespace RedimensionarIcono.WinForms
             _original = new Bitmap(loaded);
             pbPreview.Image = new Bitmap(_original);
             ToggleActions(true);
+        }
+
+        // --- ICO multi-res ---
+        private void btnSaveIcoMulti_Click(object? sender, EventArgs e)
+        {
+            if (_original == null)
+            {
+                MessageBox.Show(this, "Primero carga una imagen.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            using var dlg = new SaveFileDialog
+            {
+                Title = "Guardar .ico multi-tamaño",
+                FileName = $"{(string.IsNullOrWhiteSpace(txtBase.Text) ? "icon" : SanitizeBase(txtBase.Text))}-multires.ico",
+                Filter = "ICO (*.ico)|*.ico"
+            };
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                var transparent = chkTransparent.Checked;
+                var sizes = new [] { 16, 20, 24, 32, 48, 64, 128, 256 };
+                var bmps = sizes.Select(s => Redimensionar(_original!, s, s, transparent ? (Color?)null : _bgColor)).ToList();
+                try
+                {
+                    SaveMultiIcon(dlg.FileName, sizes, bmps);
+                    MessageBox.Show(this, ".ICO multi-res guardado.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                finally
+                {
+                    foreach (var b in bmps) b.Dispose();
+                }
+            }
+        }
+
+        // Escribir un .ico con múltiples entradas (cada entrada como PNG con alfa)
+        private static void SaveMultiIcon(string path, int[] sizes, System.Collections.Generic.List<Bitmap> bitmaps)
+        {
+            using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
+            using var bw = new BinaryWriter(fs);
+            // ICONDIR
+            bw.Write((ushort)0);      // reserved
+            bw.Write((ushort)1);      // type = 1 (icon)
+            bw.Write((ushort)sizes.Length); // count
+
+            // Codificar PNGs en memoria
+            var pngBytes = new System.Collections.Generic.List<byte[]>();
+            foreach (var bmp in bitmaps)
+            {
+                using var ms = new MemoryStream();
+                bmp.Save(ms, ImageFormat.Png);
+                pngBytes.Add(ms.ToArray());
+            }
+
+            int dirSize = 6 + 16 * sizes.Length;
+            int offset = dirSize;
+
+            // ICONDIRENTRYs
+            for (int i = 0; i < sizes.Length; i++)
+            {
+                int w = sizes[i];
+                int h = sizes[i];
+                var data = pngBytes[i];
+                bw.Write((byte)(w == 256 ? 0 : w)); // width (0 => 256)
+                bw.Write((byte)(h == 256 ? 0 : h)); // height
+                bw.Write((byte)0);                  // color count
+                bw.Write((byte)0);                  // reserved
+                bw.Write((ushort)1);                // planes
+                bw.Write((ushort)32);               // bit count
+                bw.Write((uint)data.Length);        // bytes in res
+                bw.Write((uint)offset);             // image offset
+                offset += data.Length;
+            }
+
+            // Escribir los PNG concatenados
+            foreach (var data in pngBytes)
+            {
+                bw.Write(data);
+            }
+        }
+
+        // --- Manifest JSON ---
+        private void btnGenManifest_Click(object? sender, EventArgs e)
+        {
+            var baseName = string.IsNullOrWhiteSpace(txtBase.Text) ? "icon" : SanitizeBase(txtBase.Text);
+            var icons = new (int size, string path, string purpose)[]
+            {
+                (192, $"img/{baseName}-192x192.png", "any maskable"),
+                (512, $"img/{baseName}-512x512.png", "any maskable")
+            };
+            using var sw = new StringWriter();
+            sw.WriteLine("\"icons\": [");
+            for (int i = 0; i < icons.Length; i++)
+            {
+                var ic = icons[i];
+                sw.Write($"  {{ \"src\": \"{ic.path}\", \"sizes\": \"{ic.size}x{ic.size}\", \"type\": \"image/png\", \"purpose\": \"{ic.purpose}\" }}");
+                sw.WriteLine(i < icons.Length - 1 ? "," : string.Empty);
+            }
+            sw.Write("]");
+            txtManifest.Text = sw.ToString();
+        }
+
+        private void btnCopyManifest_Click(object? sender, EventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(txtManifest.Text))
+            {
+                Clipboard.SetText(txtManifest.Text);
+                MessageBox.Show(this, "Bloque manifest copiado.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
     }
 }

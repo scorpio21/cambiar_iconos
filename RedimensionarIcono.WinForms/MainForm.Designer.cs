@@ -31,7 +31,17 @@ namespace RedimensionarIcono.WinForms
             this.btnSaveBasics = new Button();
             this.cbFormat = new ComboBox();
             this.lblFormat = new Label();
+            this.lblBase = new Label();
+            this.txtBase = new TextBox();
+            this.btnSaveIcoMulti = new Button();
+            this.lblMobile = new Label();
+            this.pbMobile = new PictureBox();
+            this.lblManifest = new Label();
+            this.txtManifest = new TextBox();
+            this.btnGenManifest = new Button();
+            this.btnCopyManifest = new Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbPreview)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbMobile)).BeginInit();
             this.SuspendLayout();
             //
             // btnLoad
@@ -104,6 +114,7 @@ namespace RedimensionarIcono.WinForms
             this.cbFormat.DropDownStyle = ComboBoxStyle.DropDownList;
             this.cbFormat.Location = new Point(410, 196);
             this.cbFormat.Size = new Size(120, 28);
+            this.cbFormat.Items.AddRange(new object[] { "PNG", "JPG", "ICO" });
             //
             // btnResize
             //
@@ -125,15 +136,75 @@ namespace RedimensionarIcono.WinForms
             this.btnSaveBasics.Size = new Size(250, 36);
             this.btnSaveBasics.Text = "Guardar básicos";
             this.btnSaveBasics.Click += new System.EventHandler(this.btnSaveBasics_Click);
+
+            // lblBase
+            this.lblBase.AutoSize = true;
+            this.lblBase.Location = new Point(340, 20);
+            this.lblBase.Text = "Nombre base:";
+
+            // txtBase
+            this.txtBase.Location = new Point(340, 42);
+            this.txtBase.Size = new Size(250, 27);
+
+            // btnSaveIcoMulti
+            this.btnSaveIcoMulti.Location = new Point(340, 330);
+            this.btnSaveIcoMulti.Size = new Size(250, 36);
+            this.btnSaveIcoMulti.Text = "Guardar ICO multi-tamaño";
+            this.btnSaveIcoMulti.Click += new System.EventHandler(this.btnSaveIcoMulti_Click);
+
+            // lblMobile
+            this.lblMobile.AutoSize = true;
+            this.lblMobile.Location = new Point(20, 380);
+            this.lblMobile.Text = "Vista móvil";
+
+            // pbMobile
+            this.pbMobile.BorderStyle = BorderStyle.FixedSingle;
+            this.pbMobile.Location = new Point(20, 405);
+            this.pbMobile.Name = "pbMobile";
+            this.pbMobile.Size = new Size(96, 96);
+            this.pbMobile.SizeMode = PictureBoxSizeMode.Zoom;
+
+            // lblManifest
+            this.lblManifest.AutoSize = true;
+            this.lblManifest.Location = new Point(140, 380);
+            this.lblManifest.Text = "Bloque Manifest";
+
+            // txtManifest
+            this.txtManifest.Location = new Point(140, 405);
+            this.txtManifest.Multiline = true;
+            this.txtManifest.ScrollBars = ScrollBars.Vertical;
+            this.txtManifest.Size = new Size(450, 120);
+            this.txtManifest.ReadOnly = true;
+
+            // btnGenManifest
+            this.btnGenManifest.Location = new Point(140, 530);
+            this.btnGenManifest.Size = new Size(150, 32);
+            this.btnGenManifest.Text = "Generar manifest";
+            this.btnGenManifest.Click += new System.EventHandler(this.btnGenManifest_Click);
+
+            // btnCopyManifest
+            this.btnCopyManifest.Location = new Point(300, 530);
+            this.btnCopyManifest.Size = new Size(150, 32);
+            this.btnCopyManifest.Text = "Copiar JSON";
+            this.btnCopyManifest.Click += new System.EventHandler(this.btnCopyManifest_Click);
             //
             // MainForm
             //
             this.AutoScaleDimensions = new SizeF(8F, 20F);
             this.AutoScaleMode = AutoScaleMode.Font;
-            this.ClientSize = new Size(620, 400);
+            this.ClientSize = new Size(620, 580);
             this.AllowDrop = true;
             this.DragEnter += new DragEventHandler(this.MainForm_DragEnter);
             this.DragDrop += new DragEventHandler(this.MainForm_DragDrop);
+            this.Controls.Add(this.lblBase);
+            this.Controls.Add(this.txtBase);
+            this.Controls.Add(this.btnSaveIcoMulti);
+            this.Controls.Add(this.lblMobile);
+            this.Controls.Add(this.pbMobile);
+            this.Controls.Add(this.lblManifest);
+            this.Controls.Add(this.txtManifest);
+            this.Controls.Add(this.btnGenManifest);
+            this.Controls.Add(this.btnCopyManifest);
             this.Controls.Add(this.btnLoad);
             this.Controls.Add(this.pbPreview);
             this.Controls.Add(this.lblSize);
@@ -153,6 +224,7 @@ namespace RedimensionarIcono.WinForms
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Text = "Redimensionar Icono (WinForms)";
             ((System.ComponentModel.ISupportInitialize)(this.pbPreview)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbMobile)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
         }
@@ -170,5 +242,14 @@ namespace RedimensionarIcono.WinForms
         private Button btnSaveBasics;
         private ComboBox cbFormat;
         private Label lblFormat;
+        private Label lblBase;
+        private TextBox txtBase;
+        private Button btnSaveIcoMulti;
+        private Label lblMobile;
+        private PictureBox pbMobile;
+        private Label lblManifest;
+        private TextBox txtManifest;
+        private Button btnGenManifest;
+        private Button btnCopyManifest;
     }
 }
