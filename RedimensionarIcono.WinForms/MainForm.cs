@@ -236,6 +236,25 @@ namespace RedimensionarIcono.WinForms
             }
         }
 
+        // Actualiza las opciones del combo de formato en función de la transparencia
+        private void UpdateFormatOptions()
+        {
+            var current = (cbFormat.SelectedItem?.ToString() ?? "PNG").ToUpperInvariant();
+            var transparent = chkTransparent.Checked;
+            cbFormat.Items.Clear();
+            if (transparent)
+            {
+                cbFormat.Items.AddRange(new object[] { "PNG", "ICO" });
+                if (current == "JPG") current = "PNG";
+            }
+            else
+            {
+                cbFormat.Items.AddRange(new object[] { "PNG", "JPG", "ICO" });
+            }
+            var idx = cbFormat.Items.IndexOf(current);
+            cbFormat.SelectedIndex = idx >= 0 ? idx : 0;
+        }
+
         // Guardar un ICO de un solo tamaño usando HICON
         private static void GuardarComoIco(Bitmap bmp, string path)
         {
