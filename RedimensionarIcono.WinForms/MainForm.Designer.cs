@@ -50,6 +50,9 @@ namespace RedimensionarIcono.WinForms
             this.pbPreview.Name = "pbPreview";
             this.pbPreview.Size = new Size(300, 300);
             this.pbPreview.SizeMode = PictureBoxSizeMode.Zoom;
+            this.pbPreview.AllowDrop = true;
+            this.pbPreview.DragEnter += new DragEventHandler(this.MainForm_DragEnter);
+            this.pbPreview.DragDrop += new DragEventHandler(this.MainForm_DragDrop);
             //
             // lblSize
             //
@@ -128,6 +131,9 @@ namespace RedimensionarIcono.WinForms
             this.AutoScaleDimensions = new SizeF(8F, 20F);
             this.AutoScaleMode = AutoScaleMode.Font;
             this.ClientSize = new Size(620, 400);
+            this.AllowDrop = true;
+            this.DragEnter += new DragEventHandler(this.MainForm_DragEnter);
+            this.DragDrop += new DragEventHandler(this.MainForm_DragDrop);
             this.Controls.Add(this.btnLoad);
             this.Controls.Add(this.pbPreview);
             this.Controls.Add(this.lblSize);

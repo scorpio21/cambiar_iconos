@@ -204,5 +204,52 @@ namespace RedimensionarIcono.WinForms
                 bmp.Save(path, codec, p);
             }
         }
+
+        // --- Drag & Drop ---
+        private void MainForm_DragEnter(object? sender, DragEventArgs e)
+        {
+            if (e.Data != null && e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                var files = (string[]) (e.Data.GetData(DataFormats.FileDrop) ?? Array.Empty<string>());
+                if (files.Length > 0 && EsImagen(files[0]))
+                {
+                    e.Effect = DragDropEffects.Copy;
+                    return;
+                }
+            }
+            e.Effect = DragDropEffects.None;
+        }
+
+        private void MainForm_DragDrop(object? sender, DragEventArgs e)
+        {
+            try
+            {
+                var files = (string[]) (e.Data?.GetData(DataFormats.FileDrop) ?? Array.Empty<string>());
+                if (files.Length == 0) return;
+                var path = files[0];
+                if (!EsImagen(path)) return;
+                CargarImagenDesdeRuta(path);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "No se pudo cargar la imagen: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private static bool EsImagen(string path)
+        {
+            string[] exts = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp" };
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+            return exts.Contains(ext);
+        }
+
+        private void CargarImagenDesdeRuta(string path)
+        {
+            _original?.Dispose();
+            using var loaded = new Bitmap(path);
+            _original = new Bitmap(loaded);
+            pbPreview.Image = new Bitmap(_original);
+            ToggleActions(true);
+        }
     }
 }
