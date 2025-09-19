@@ -21,11 +21,7 @@ namespace RedimensionarIcono.WinForms
             cbSize.Items.AddRange(_sizes.Select(s => (object)$"{s}x{s}").ToArray());
             cbSize.SelectedIndex = Array.IndexOf(_sizes, 192);
             // Formatos
-            if (cbFormat.Items.Count == 0)
-            {
-                cbFormat.Items.AddRange(new object[] { "PNG", "JPG", "ICO" });
-            }
-            cbFormat.SelectedIndex = 0;
+            UpdateFormatOptions();
             ToggleActions(false);
         }
 
@@ -63,6 +59,7 @@ namespace RedimensionarIcono.WinForms
                     }
                     catch { /* ignore */ }
                     ToggleActions(true);
+                    UpdateFormatOptions();
                 }
                 catch (Exception ex)
                 {
@@ -399,6 +396,11 @@ namespace RedimensionarIcono.WinForms
                 Clipboard.SetText(txtManifest.Text);
                 MessageBox.Show(this, "Bloque manifest copiado.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+        }
+
+        private void chkTransparent_CheckedChanged(object? sender, EventArgs e)
+        {
+            UpdateFormatOptions();
         }
     }
 }

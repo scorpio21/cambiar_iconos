@@ -102,6 +102,7 @@ namespace RedimensionarIcono.WinForms
             this.chkTransparent.AutoSize = true;
             this.chkTransparent.Location = new Point(340, 160);
             this.chkTransparent.Text = "Fondo transparente (PNG)";
+            this.chkTransparent.CheckedChanged += new System.EventHandler(this.chkTransparent_CheckedChanged);
             //
             // lblFormat
             //
