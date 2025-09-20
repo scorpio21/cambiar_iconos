@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -16,6 +17,8 @@ namespace RedimensionarIcono.WinForms.Services
             public int IconIndex { get; set; }
             public string? SavedIconIco { get; set; }
             public string? SavedIconPng { get; set; }
+            public int[]? LastSizesZip { get; set; }
+            public int[]? LastSizesRes { get; set; }
         }
 
         private static readonly string ConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
@@ -112,6 +115,37 @@ namespace RedimensionarIcono.WinForms.Services
             {
                 MessageBox.Show(form, "No se pudo guardar la configuración: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        // Sugerencias de tamaños persistentes para exportaciones
+        public static int[] GetSuggestedSizesForZip()
+        {
+            var cfg = Load();
+            return cfg?.LastSizesZip != null && cfg.LastSizesZip.Length > 0
+                ? cfg.LastSizesZip.Distinct().OrderBy(x => x).ToArray()
+                : new[] { 16, 20, 24, 32, 48, 64, 96, 128, 180, 192, 256, 512 };
+        }
+
+        public static int[] GetSuggestedSizesForRes()
+        {
+            var cfg = Load();
+            return cfg?.LastSizesRes != null && cfg.LastSizesRes.Length > 0
+                ? cfg.LastSizesRes.Distinct().OrderBy(x => x).ToArray()
+                : new[] { 16, 32, 48, 64, 128, 256 };
+        }
+
+        public static void SaveLastSizesForZip(int[] sizes)
+        {
+            var cfg = Load() ?? new AppConfig();
+            cfg.LastSizesZip = sizes?.Distinct().OrderBy(x => x).ToArray();
+            Save(cfg);
+        }
+
+        public static void SaveLastSizesForRes(int[] sizes)
+        {
+            var cfg = Load() ?? new AppConfig();
+            cfg.LastSizesRes = sizes?.Distinct().OrderBy(x => x).ToArray();
+            Save(cfg);
         }
 
         private static AppConfig? Load()
