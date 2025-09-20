@@ -18,6 +18,7 @@ namespace RedimensionarIcono.WinForms
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             btnLoad = new Button();
             pbPreview = new PictureBox();
             lblSize = new Label();
@@ -42,9 +43,11 @@ namespace RedimensionarIcono.WinForms
             archivoToolStripMenuItem = new ToolStripMenuItem();
             salirToolStripMenuItem = new ToolStripMenuItem();
             txtBase = new TextBox();
+            pictureBox1 = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)pbPreview).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pbMobile).BeginInit();
             menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
             // btnLoad
@@ -75,9 +78,12 @@ namespace RedimensionarIcono.WinForms
             // lblSize
             // 
             lblSize.AutoSize = true;
+            lblSize.BackColor = Color.Transparent;
+            lblSize.Font = new Font("Showcard Gothic", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblSize.ForeColor = Color.IndianRed;
             lblSize.Location = new Point(240, 57);
             lblSize.Name = "lblSize";
-            lblSize.Size = new Size(53, 15);
+            lblSize.Size = new Size(61, 15);
             lblSize.TabIndex = 11;
             lblSize.Text = "Tamaño:";
             // 
@@ -93,9 +99,12 @@ namespace RedimensionarIcono.WinForms
             // lblBg
             // 
             lblBg.AutoSize = true;
-            lblBg.Location = new Point(240, 87);
+            lblBg.BackColor = Color.Transparent;
+            lblBg.Font = new Font("Showcard Gothic", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblBg.ForeColor = Color.IndianRed;
+            lblBg.Location = new Point(246, 86);
             lblBg.Name = "lblBg";
-            lblBg.Size = new Size(44, 15);
+            lblBg.Size = new Size(55, 15);
             lblBg.TabIndex = 13;
             lblBg.Text = "Fondo:";
             // 
@@ -122,12 +131,16 @@ namespace RedimensionarIcono.WinForms
             // chkTransparent
             // 
             chkTransparent.AutoSize = true;
-            chkTransparent.Location = new Point(243, 110);
+            chkTransparent.BackColor = Color.Transparent;
+            chkTransparent.Font = new Font("Showcard Gothic", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            chkTransparent.ForeColor = Color.IndianRed;
+            chkTransparent.Location = new Point(215, 110);
             chkTransparent.Margin = new Padding(3, 2, 3, 2);
             chkTransparent.Name = "chkTransparent";
-            chkTransparent.Size = new Size(164, 19);
+            chkTransparent.Size = new Size(200, 19);
             chkTransparent.TabIndex = 16;
             chkTransparent.Text = "Fondo transparente (PNG)";
+            chkTransparent.UseVisualStyleBackColor = false;
             chkTransparent.CheckedChanged += chkTransparent_CheckedChanged;
             // 
             // btnResize
@@ -173,9 +186,12 @@ namespace RedimensionarIcono.WinForms
             // lblFormat
             // 
             lblFormat.AutoSize = true;
-            lblFormat.Location = new Point(240, 136);
+            lblFormat.BackColor = Color.Transparent;
+            lblFormat.Font = new Font("Showcard Gothic", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblFormat.ForeColor = Color.IndianRed;
+            lblFormat.Location = new Point(232, 135);
             lblFormat.Name = "lblFormat";
-            lblFormat.Size = new Size(55, 15);
+            lblFormat.Size = new Size(69, 15);
             lblFormat.TabIndex = 17;
             lblFormat.Text = "Formato:";
             // 
@@ -192,9 +208,12 @@ namespace RedimensionarIcono.WinForms
             // lblMobile
             // 
             lblMobile.AutoSize = true;
+            lblMobile.BackColor = Color.Transparent;
+            lblMobile.Font = new Font("Showcard Gothic", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblMobile.ForeColor = Color.IndianRed;
             lblMobile.Location = new Point(333, 187);
             lblMobile.Name = "lblMobile";
-            lblMobile.Size = new Size(65, 15);
+            lblMobile.Size = new Size(82, 15);
             lblMobile.TabIndex = 3;
             lblMobile.Text = "Vista móvil";
             // 
@@ -212,9 +231,12 @@ namespace RedimensionarIcono.WinForms
             // lblManifest
             // 
             lblManifest.AutoSize = true;
+            lblManifest.BackColor = Color.Transparent;
+            lblManifest.Font = new Font("Showcard Gothic", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblManifest.ForeColor = Color.IndianRed;
             lblManifest.Location = new Point(12, 304);
             lblManifest.Name = "lblManifest";
-            lblManifest.Size = new Size(93, 15);
+            lblManifest.Size = new Size(117, 15);
             lblManifest.TabIndex = 5;
             lblManifest.Text = "Bloque Manifest";
             // 
@@ -280,6 +302,16 @@ namespace RedimensionarIcono.WinForms
             txtBase.Size = new Size(72, 23);
             txtBase.TabIndex = 1;
             // 
+            // pictureBox1
+            // 
+            pictureBox1.Dock = DockStyle.Fill;
+            pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
+            pictureBox1.Location = new Point(0, 0);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(416, 404);
+            pictureBox1.TabIndex = 22;
+            pictureBox1.TabStop = false;
+            // 
             // MainForm
             // 
             AllowDrop = true;
@@ -308,6 +340,7 @@ namespace RedimensionarIcono.WinForms
             Controls.Add(btnResize);
             Controls.Add(btnSaveOne);
             Controls.Add(btnSaveBasics);
+            Controls.Add(pictureBox1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MainMenuStrip = menuStrip1;
             Margin = new Padding(3, 2, 3, 2);
@@ -322,6 +355,7 @@ namespace RedimensionarIcono.WinForms
             ((System.ComponentModel.ISupportInitialize)pbMobile).EndInit();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -350,5 +384,6 @@ namespace RedimensionarIcono.WinForms
         private ToolStripMenuItem archivoToolStripMenuItem;
         private ToolStripMenuItem salirToolStripMenuItem;
         private TextBox txtBase;
+        private PictureBox pictureBox1;
     }
 }

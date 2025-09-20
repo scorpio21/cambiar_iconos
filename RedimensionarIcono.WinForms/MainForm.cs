@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Windows.Forms;
 
 namespace RedimensionarIcono.WinForms
@@ -23,6 +24,17 @@ namespace RedimensionarIcono.WinForms
             // Formatos
             UpdateFormatOptions();
             ToggleActions(false);
+            // Asegurar "transparencia" visual reparentando al host (pictureBox1)
+            if (pictureBox1 != null)
+            {
+                MakeTransparentOn(lblSize, pictureBox1);
+                MakeTransparentOn(lblBg, pictureBox1);
+                MakeTransparentOn(lblFormat, pictureBox1);
+                MakeTransparentOn(lblMobile, pictureBox1);
+                MakeTransparentOn(lblManifest, pictureBox1);
+                MakeTransparentOn(chkTransparent, pictureBox1);
+                pictureBox1.SendToBack();
+            }
         }
 
         private void ToggleActions(bool enabled)
@@ -433,6 +445,26 @@ namespace RedimensionarIcono.WinForms
         {
             // Asegurar que el combo de formatos esté en estado correcto al iniciar
             UpdateFormatOptions();
+            if (pictureBox1 != null)
+            {
+                pictureBox1.SendToBack();
+            }
+        }
+
+        // Helper para simular transparencia reparentando el control al host
+        private void MakeTransparentOn(Control ctrl, Control host)
+        {
+            if (ctrl == null || host == null || ctrl.Parent == host) return;
+            // Coordenadas absolutas actuales
+            var screenPos = ctrl.Parent != null
+                ? ctrl.Parent.PointToScreen(ctrl.Location)
+                : this.PointToScreen(ctrl.Location);
+            // Nueva ubicación relativa al host
+            var newPos = host.PointToClient(screenPos);
+            ctrl.Parent = host;
+            ctrl.Location = newPos;
+            ctrl.BackColor = Color.Transparent;
+            ctrl.BringToFront();
         }
     }
 }
