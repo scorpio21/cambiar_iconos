@@ -47,6 +47,8 @@ namespace RedimensionarIcono.WinForms
             generarManifestToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator1 = new ToolStripSeparator();
             salirToolStripMenuItem = new ToolStripMenuItem();
+            utilidadesToolStripMenuItem = new ToolStripMenuItem();
+            seleccionarIconoToolStripMenuItem = new ToolStripMenuItem();
             txtBase = new TextBox();
             pictureBox1 = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)pbPreview).BeginInit();
@@ -278,7 +280,7 @@ namespace RedimensionarIcono.WinForms
             // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new ToolStripItem[] { archivoToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { archivoToolStripMenuItem, utilidadesToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(416, 24);
@@ -290,6 +292,21 @@ namespace RedimensionarIcono.WinForms
             archivoToolStripMenuItem.Name = "archivoToolStripMenuItem";
             archivoToolStripMenuItem.Size = new Size(60, 20);
             archivoToolStripMenuItem.Text = "&Archivo";
+            // 
+            // utilidadesToolStripMenuItem
+            // 
+            utilidadesToolStripMenuItem.Name = "utilidadesToolStripMenuItem";
+            utilidadesToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.U;
+            utilidadesToolStripMenuItem.Size = new Size(72, 20);
+            utilidadesToolStripMenuItem.Text = "&Utilidades";
+            utilidadesToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { seleccionarIconoToolStripMenuItem });
+            // 
+            // seleccionarIconoToolStripMenuItem
+            // 
+            seleccionarIconoToolStripMenuItem.Name = "seleccionarIconoToolStripMenuItem";
+            seleccionarIconoToolStripMenuItem.Size = new Size(175, 22);
+            seleccionarIconoToolStripMenuItem.Text = "&Seleccionar Icono";
+            seleccionarIconoToolStripMenuItem.Click += seleccionarIconoToolStripMenuItem_Click;
             // 
             // abrirToolStripMenuItem
             // 
@@ -425,6 +442,8 @@ namespace RedimensionarIcono.WinForms
         private ToolStripMenuItem generarManifestToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem salirToolStripMenuItem;
+        private ToolStripMenuItem utilidadesToolStripMenuItem;
+        private ToolStripMenuItem seleccionarIconoToolStripMenuItem;
         private TextBox txtBase;
         private PictureBox pictureBox1;
     }

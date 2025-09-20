@@ -5,6 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.Json;
 
 namespace RedimensionarIcono.WinForms
 {
@@ -14,6 +17,7 @@ namespace RedimensionarIcono.WinForms
         private Bitmap? _lastResized;
         private readonly int[] _sizes = new[] { 16, 20, 24, 32, 36, 48, 72, 96, 120, 144, 152, 167, 180, 192, 256, 384, 512 };
         private Color _bgColor = Color.White;
+        private readonly string _configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
 
         public MainForm()
         {
@@ -449,6 +453,33 @@ namespace RedimensionarIcono.WinForms
             {
                 pictureBox1.SendToBack();
             }
+
+            // Intentar leer el icono guardado previamente y aplicarlo
+            try
+            {
+                var cfg = CargarConfig();
+                if (cfg != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(cfg.SavedIconIco) && File.Exists(cfg.SavedIconIco))
+                    {
+                        using var ico = new Icon(cfg.SavedIconIco);
+                        this.Icon = (Icon)ico.Clone();
+                    }
+                    else if (File.Exists(cfg.IconPath))
+                    {
+                        using var ico = ExtraerIcono(cfg.IconPath, cfg.IconIndex, large: true);
+                        if (ico != null)
+                        {
+                            this.Icon = (Icon)ico.Clone();
+                        }
+                    }
+                    if (!string.IsNullOrWhiteSpace(cfg.SavedIconPng) && File.Exists(cfg.SavedIconPng))
+                    {
+                        pbMobile.Image = Image.FromFile(cfg.SavedIconPng);
+                    }
+                }
+            }
+            catch { /* no bloquear carga por esto */ }
         }
 
         // Helper para simular transparencia reparentando el control al host
@@ -465,6 +496,121 @@ namespace RedimensionarIcono.WinForms
             ctrl.Location = newPos;
             ctrl.BackColor = Color.Transparent;
             ctrl.BringToFront();
+        }
+
+        // =====================
+        // Utilidades: Seleccionar Icono
+        // =====================
+
+        // Declaración API PickIconDlg de shell32.dll
+        [DllImport("shell32.dll", CharSet = CharSet.Auto)]
+        private static extern bool PickIconDlg(IntPtr hwnd, StringBuilder pszIconPath, int cchIconPath, ref int piIconIndex);
+
+        // Extraer icono por índice desde archivo (DLL/EXE/ICO)
+        [DllImport("shell32.dll", CharSet = CharSet.Auto)]
+        private static extern uint ExtractIconEx(string lpszFile, int nIconIndex, IntPtr[]? phiconLarge, IntPtr[]? phiconSmall, uint nIcons);
+
+        private sealed class AppConfig
+        {
+            public string IconPath { get; set; } = string.Empty;
+            public int IconIndex { get; set; }
+            public string? SavedIconIco { get; set; }
+            public string? SavedIconPng { get; set; }
+        }
+
+        private void seleccionarIconoToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            // Path inicial: el del config si existe, o shell32.dll del sistema
+            string startPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "shell32.dll");
+            int iconIndex = 0;
+            var cfg = CargarConfig();
+            if (cfg != null && !string.IsNullOrWhiteSpace(cfg.IconPath))
+            {
+                startPath = cfg.IconPath;
+                iconIndex = cfg.IconIndex;
+            }
+
+            var sb = new StringBuilder(startPath, 260);
+            if (!File.Exists(startPath)) sb = new StringBuilder(260);
+            bool ok = false;
+            try
+            {
+                ok = PickIconDlg(this.Handle, sb, sb.Capacity, ref iconIndex);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "No se pudo abrir el selector de iconos: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!ok) return; // cancelado
+
+            var chosenPath = sb.ToString();
+            // Guardar en config.json y exportar icono a fichero
+            try
+            {
+                using var ico = ExtraerIcono(chosenPath, iconIndex, large: true);
+                string? savedIco = null;
+                string? savedPng = null;
+                if (ico != null)
+                {
+                    this.Icon = (Icon)ico.Clone();
+                    var bmp = ico.ToBitmap();
+                    pbMobile.Image = bmp;
+                    // Rutas de salida
+                    var baseName = Path.GetFileNameWithoutExtension(chosenPath);
+                    var icoOut = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{baseName}_{iconIndex}.ico");
+                    var pngOut = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{baseName}_{iconIndex}.png");
+                    // Guardar .ico (icono único) y .png
+                    using (var fs = new FileStream(icoOut, FileMode.Create, FileAccess.Write))
+                    {
+                        ico.Save(fs);
+                    }
+                    bmp.Save(pngOut, System.Drawing.Imaging.ImageFormat.Png);
+                    savedIco = icoOut;
+                    savedPng = pngOut;
+                }
+                GuardarConfig(new AppConfig { IconPath = chosenPath, IconIndex = iconIndex, SavedIconIco = savedIco, SavedIconPng = savedPng });
+                MessageBox.Show(this, "Icono guardado en config.json", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "No se pudo guardar la configuración: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void GuardarConfig(AppConfig cfg)
+        {
+            var json = JsonSerializer.Serialize(cfg, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(_configPath, json, Encoding.UTF8);
+        }
+
+        private AppConfig? CargarConfig()
+        {
+            if (!File.Exists(_configPath)) return null;
+            try
+            {
+                var json = File.ReadAllText(_configPath, Encoding.UTF8);
+                return JsonSerializer.Deserialize<AppConfig>(json);
+            }
+            catch { return null; }
+        }
+
+        private static Icon? ExtraerIcono(string path, int index, bool large)
+        {
+            try
+            {
+                IntPtr[] largeArr = large ? new IntPtr[1] : null;
+                IntPtr[] smallArr = !large ? new IntPtr[1] : null;
+                uint count = ExtractIconEx(path, index, largeArr, smallArr, 1);
+                if (count == 0) return null;
+                IntPtr hIcon = large ? (largeArr![0]) : (smallArr![0]);
+                if (hIcon == IntPtr.Zero) return null;
+                var ico = Icon.FromHandle(hIcon);
+                // Clonar para poder liberar el handle si quisiéramos más adelante
+                return (Icon)ico.Clone();
+            }
+            catch { return null; }
         }
     }
 }
