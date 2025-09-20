@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using RedimensionarIcono.WinForms.Services;
+using RedimensionarIcono.WinForms.Dialogs;
 
 namespace RedimensionarIcono.WinForms
 {
@@ -138,7 +139,7 @@ namespace RedimensionarIcono.WinForms
             {
                 if (fmtName == "ICO")
                 {
-                    GuardarComoIco(_lastResized, dlg.FileName);
+                    IcoService.SaveSingleIco(_lastResized, dlg.FileName);
                 }
                 else
                 {
@@ -267,14 +268,6 @@ namespace RedimensionarIcono.WinForms
             cbFormat.SelectedIndex = idx >= 0 ? idx : 0;
         }
 
-        // Guardar un ICO de un solo tamaño usando HICON
-        private static void GuardarComoIco(Bitmap bmp, string path)
-        {
-            using var icon = Icon.FromHandle(bmp.GetHicon());
-            using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
-            icon.Save(fs);
-        }
-
         // --- Drag & Drop ---
         private void MainForm_DragEnter(object? sender, DragEventArgs e)
         {
@@ -343,7 +336,7 @@ namespace RedimensionarIcono.WinForms
                 var bmps = sizes.Select(s => Redimensionar(_original!, s, s, transparent ? (Color?)null : _bgColor)).ToList();
                 try
                 {
-                    SaveMultiIcon(dlg.FileName, sizes, bmps);
+                    IcoService.SaveMultiIcon(dlg.FileName, sizes, bmps);
                     MessageBox.Show(this, ".ICO multi-res guardado.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 finally
@@ -353,71 +346,11 @@ namespace RedimensionarIcono.WinForms
             }
         }
 
-        // Escribir un .ico con múltiples entradas (cada entrada como PNG con alfa)
-        private static void SaveMultiIcon(string path, int[] sizes, System.Collections.Generic.List<Bitmap> bitmaps)
-        {
-            using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
-            using var bw = new BinaryWriter(fs);
-            // ICONDIR
-            bw.Write((ushort)0);      // reserved
-            bw.Write((ushort)1);      // type = 1 (icon)
-            bw.Write((ushort)sizes.Length); // count
-
-            // Codificar PNGs en memoria
-            var pngBytes = new System.Collections.Generic.List<byte[]>();
-            foreach (var bmp in bitmaps)
-            {
-                using var ms = new MemoryStream();
-                bmp.Save(ms, ImageFormat.Png);
-                pngBytes.Add(ms.ToArray());
-            }
-
-            int dirSize = 6 + 16 * sizes.Length;
-            int offset = dirSize;
-
-            // ICONDIRENTRYs
-            for (int i = 0; i < sizes.Length; i++)
-            {
-                int w = sizes[i];
-                int h = sizes[i];
-                var data = pngBytes[i];
-                bw.Write((byte)(w == 256 ? 0 : w)); // width (0 => 256)
-                bw.Write((byte)(h == 256 ? 0 : h)); // height
-                bw.Write((byte)0);                  // color count
-                bw.Write((byte)0);                  // reserved
-                bw.Write((ushort)1);                // planes
-                bw.Write((ushort)32);               // bit count
-                bw.Write((uint)data.Length);        // bytes in res
-                bw.Write((uint)offset);             // image offset
-                offset += data.Length;
-            }
-
-            // Escribir los PNG concatenados
-            foreach (var data in pngBytes)
-            {
-                bw.Write(data);
-            }
-        }
-
         // --- Manifest JSON ---
         private void btnGenManifest_Click(object? sender, EventArgs e)
         {
             var baseName = string.IsNullOrWhiteSpace(txtBase.Text) ? "icon" : SanitizeBase(txtBase.Text);
-            var icons = new (int size, string path, string purpose)[]
-            {
-                (192, $"img/{baseName}-192x192.png", "any maskable"),
-                (512, $"img/{baseName}-512x512.png", "any maskable")
-            };
-            using var sw = new StringWriter();
-            sw.WriteLine("\"icons\": [");
-            for (int i = 0; i < icons.Length; i++)
-            {
-                var ic = icons[i];
-                sw.Write($"  {{ \"src\": \"{ic.path}\", \"sizes\": \"{ic.size}x{ic.size}\", \"type\": \"image/png\", \"purpose\": \"{ic.purpose}\" }}");
-                sw.WriteLine(i < icons.Length - 1 ? "," : string.Empty);
-            }
-            sw.Write("]");
-            txtManifest.Text = sw.ToString();
+            txtManifest.Text = ManifestService.GenerateIconsBlock(baseName);
         }
 
         private void btnCopyManifest_Click(object? sender, EventArgs e)
@@ -426,6 +359,81 @@ namespace RedimensionarIcono.WinForms
             {
                 Clipboard.SetText(txtManifest.Text);
                 MessageBox.Show(this, "Bloque manifest copiado.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        // --- Utilidades: Exportar paquete (ZIP renombrado .dll) ---
+        private void exportarPaqueteToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            if (_original == null)
+            {
+                MessageBox.Show(this, "Primero carga o redimensiona una imagen para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            var baseName = string.IsNullOrWhiteSpace(txtBase.Text) ? "icon" : SanitizeBase(txtBase.Text);
+            bool transparent = chkTransparent.Checked;
+            bool includeManifest = !string.IsNullOrWhiteSpace(txtManifest.Text);
+            // Selección de tamaños
+            int[] selectedSizes;
+            using (var dlgSizes = new SeleccionarTamanosDialog(new[] { 16, 20, 24, 32, 48, 64, 96, 128, 180, 192, 256, 512 }))
+            {
+                if (dlgSizes.ShowDialog(this) != DialogResult.OK) return;
+                selectedSizes = dlgSizes.TamanosSeleccionados;
+            }
+            using var dlg = new SaveFileDialog
+            {
+                Title = "Exportar paquete (.dll contenedor)",
+                FileName = baseName + ".dll",
+                Filter = "Paquete (*.dll)|*.dll"
+            };
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                try
+                {
+                    PackageService.ExportZipAsDll(this, _original, baseName, transparent ? (Color?)null : _bgColor, includeManifest, dlg.FileName, selectedSizes);
+                    MessageBox.Show(this, "Paquete exportado.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "No se pudo exportar el paquete: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        // --- Utilidades: Exportar recursos (DLL nativo) ---
+        private void exportarRecursosToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            if (_original == null)
+            {
+                MessageBox.Show(this, "Primero carga o redimensiona una imagen para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            var baseName = string.IsNullOrWhiteSpace(txtBase.Text) ? "icon" : SanitizeBase(txtBase.Text);
+            bool transparent = chkTransparent.Checked;
+            // Selección de tamaños
+            int[] selectedSizes;
+            using (var dlgSizes = new SeleccionarTamanosDialog(new[] { 16, 32, 48, 64, 128, 256 }))
+            {
+                if (dlgSizes.ShowDialog(this) != DialogResult.OK) return;
+                selectedSizes = dlgSizes.TamanosSeleccionados;
+            }
+            using var dlg = new SaveFileDialog
+            {
+                Title = "Exportar recursos (DLL nativo)",
+                FileName = baseName + "-resources.dll",
+                Filter = "DLL de recursos (*.dll)|*.dll"
+            };
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                try
+                {
+                    PackageService.ExportResourceDll(this, _original, baseName, transparent ? (Color?)null : _bgColor, dlg.FileName, selectedSizes);
+                    MessageBox.Show(this, "DLL de recursos exportado.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "No se pudo exportar el DLL de recursos: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 

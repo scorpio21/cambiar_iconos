@@ -49,6 +49,9 @@ namespace RedimensionarIcono.WinForms
             salirToolStripMenuItem = new ToolStripMenuItem();
             utilidadesToolStripMenuItem = new ToolStripMenuItem();
             seleccionarIconoToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSeparator2 = new ToolStripSeparator();
+            exportarPaqueteToolStripMenuItem = new ToolStripMenuItem();
+            exportarRecursosToolStripMenuItem = new ToolStripMenuItem();
             txtBase = new TextBox();
             pictureBox1 = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)pbPreview).BeginInit();
@@ -299,7 +302,7 @@ namespace RedimensionarIcono.WinForms
             utilidadesToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.U;
             utilidadesToolStripMenuItem.Size = new Size(72, 20);
             utilidadesToolStripMenuItem.Text = "&Utilidades";
-            utilidadesToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { seleccionarIconoToolStripMenuItem });
+            utilidadesToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { seleccionarIconoToolStripMenuItem, toolStripSeparator2, exportarPaqueteToolStripMenuItem, exportarRecursosToolStripMenuItem });
             // 
             // seleccionarIconoToolStripMenuItem
             // 
@@ -307,6 +310,20 @@ namespace RedimensionarIcono.WinForms
             seleccionarIconoToolStripMenuItem.Size = new Size(175, 22);
             seleccionarIconoToolStripMenuItem.Text = "&Seleccionar Icono";
             seleccionarIconoToolStripMenuItem.Click += seleccionarIconoToolStripMenuItem_Click;
+            // 
+            // exportarPaqueteToolStripMenuItem
+            // 
+            exportarPaqueteToolStripMenuItem.Name = "exportarPaqueteToolStripMenuItem";
+            exportarPaqueteToolStripMenuItem.Size = new Size(206, 22);
+            exportarPaqueteToolStripMenuItem.Text = "Exportar &paquete (.dll)";
+            exportarPaqueteToolStripMenuItem.Click += exportarPaqueteToolStripMenuItem_Click;
+            // 
+            // exportarRecursosToolStripMenuItem
+            // 
+            exportarRecursosToolStripMenuItem.Name = "exportarRecursosToolStripMenuItem";
+            exportarRecursosToolStripMenuItem.Size = new Size(206, 22);
+            exportarRecursosToolStripMenuItem.Text = "Exportar &recursos (DLL)";
+            exportarRecursosToolStripMenuItem.Click += exportarRecursosToolStripMenuItem_Click;
             // 
             // abrirToolStripMenuItem
             // 
@@ -444,6 +461,9 @@ namespace RedimensionarIcono.WinForms
         private ToolStripMenuItem salirToolStripMenuItem;
         private ToolStripMenuItem utilidadesToolStripMenuItem;
         private ToolStripMenuItem seleccionarIconoToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripMenuItem exportarPaqueteToolStripMenuItem;
+        private ToolStripMenuItem exportarRecursosToolStripMenuItem;
         private TextBox txtBase;
         private PictureBox pictureBox1;
     }
