@@ -427,5 +427,12 @@ namespace RedimensionarIcono.WinForms
         {
             Close();
         }
+
+        // Evento Load referenciado desde el diseñador
+        private void MainForm_Load(object? sender, EventArgs e)
+        {
+            // Asegurar que el combo de formatos esté en estado correcto al iniciar
+            UpdateFormatOptions();
+        }
     }
 }
