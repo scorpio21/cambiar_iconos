@@ -41,6 +41,11 @@ namespace RedimensionarIcono.WinForms
             btnCopyManifest = new Button();
             menuStrip1 = new MenuStrip();
             archivoToolStripMenuItem = new ToolStripMenuItem();
+            abrirToolStripMenuItem = new ToolStripMenuItem();
+            guardarToolStripMenuItem = new ToolStripMenuItem();
+            guardarBasicosToolStripMenuItem = new ToolStripMenuItem();
+            generarManifestToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSeparator1 = new ToolStripSeparator();
             salirToolStripMenuItem = new ToolStripMenuItem();
             txtBase = new TextBox();
             pictureBox1 = new PictureBox();
@@ -281,10 +286,42 @@ namespace RedimensionarIcono.WinForms
             // 
             // archivoToolStripMenuItem
             // 
-            archivoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { salirToolStripMenuItem });
+            archivoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { abrirToolStripMenuItem, guardarToolStripMenuItem, guardarBasicosToolStripMenuItem, generarManifestToolStripMenuItem, toolStripSeparator1, salirToolStripMenuItem });
             archivoToolStripMenuItem.Name = "archivoToolStripMenuItem";
             archivoToolStripMenuItem.Size = new Size(60, 20);
             archivoToolStripMenuItem.Text = "&Archivo";
+            // 
+            // abrirToolStripMenuItem
+            // 
+            abrirToolStripMenuItem.Name = "abrirToolStripMenuItem";
+            abrirToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
+            abrirToolStripMenuItem.Size = new Size(250, 22);
+            abrirToolStripMenuItem.Text = "&Abrir...";
+            abrirToolStripMenuItem.Click += btnLoad_Click;
+            // 
+            // guardarToolStripMenuItem
+            // 
+            guardarToolStripMenuItem.Name = "guardarToolStripMenuItem";
+            guardarToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.S;
+            guardarToolStripMenuItem.Size = new Size(250, 22);
+            guardarToolStripMenuItem.Text = "&Guardar";
+            guardarToolStripMenuItem.Click += btnSaveOne_Click;
+            // 
+            // guardarBasicosToolStripMenuItem
+            // 
+            guardarBasicosToolStripMenuItem.Name = "guardarBasicosToolStripMenuItem";
+            guardarBasicosToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.B;
+            guardarBasicosToolStripMenuItem.Size = new Size(250, 22);
+            guardarBasicosToolStripMenuItem.Text = "Guardar &básicos";
+            guardarBasicosToolStripMenuItem.Click += btnSaveBasics_Click;
+            // 
+            // generarManifestToolStripMenuItem
+            // 
+            generarManifestToolStripMenuItem.Name = "generarManifestToolStripMenuItem";
+            generarManifestToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.M;
+            generarManifestToolStripMenuItem.Size = new Size(250, 22);
+            generarManifestToolStripMenuItem.Text = "&Generar manifest";
+            generarManifestToolStripMenuItem.Click += btnGenManifest_Click;
             // 
             // salirToolStripMenuItem
             // 
@@ -382,6 +419,11 @@ namespace RedimensionarIcono.WinForms
         private Button btnCopyManifest;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem archivoToolStripMenuItem;
+        private ToolStripMenuItem abrirToolStripMenuItem;
+        private ToolStripMenuItem guardarToolStripMenuItem;
+        private ToolStripMenuItem guardarBasicosToolStripMenuItem;
+        private ToolStripMenuItem generarManifestToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem salirToolStripMenuItem;
         private TextBox txtBase;
         private PictureBox pictureBox1;
