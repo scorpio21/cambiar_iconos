@@ -18,241 +18,312 @@ namespace RedimensionarIcono.WinForms
 
         private void InitializeComponent()
         {
-            this.btnLoad = new Button();
-            this.pbPreview = new PictureBox();
-            this.lblSize = new Label();
-            this.cbSize = new ComboBox();
-            this.lblBg = new Label();
-            this.btnPickColor = new Button();
-            this.pnlColor = new Panel();
-            this.chkTransparent = new CheckBox();
-            this.btnResize = new Button();
-            this.btnSaveOne = new Button();
-            this.btnSaveBasics = new Button();
-            this.cbFormat = new ComboBox();
-            this.lblFormat = new Label();
-            this.lblBase = new Label();
-            this.txtBase = new TextBox();
-            this.btnSaveIcoMulti = new Button();
-            this.lblMobile = new Label();
-            this.pbMobile = new PictureBox();
-            this.lblManifest = new Label();
-            this.txtManifest = new TextBox();
-            this.btnGenManifest = new Button();
-            this.btnCopyManifest = new Button();
-            this.gbPaso1 = new GroupBox();
-            this.gbPaso2 = new GroupBox();
-            ((System.ComponentModel.ISupportInitialize)(this.pbPreview)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbMobile)).BeginInit();
-            this.SuspendLayout();
-            //
+            btnLoad = new Button();
+            pbPreview = new PictureBox();
+            lblSize = new Label();
+            cbSize = new ComboBox();
+            lblBg = new Label();
+            btnPickColor = new Button();
+            pnlColor = new Panel();
+            chkTransparent = new CheckBox();
+            btnResize = new Button();
+            btnSaveOne = new Button();
+            btnSaveBasics = new Button();
+            cbFormat = new ComboBox();
+            lblFormat = new Label();
+            btnSaveIcoMulti = new Button();
+            lblMobile = new Label();
+            pbMobile = new PictureBox();
+            lblManifest = new Label();
+            txtManifest = new TextBox();
+            btnGenManifest = new Button();
+            btnCopyManifest = new Button();
+            menuStrip1 = new MenuStrip();
+            archivoToolStripMenuItem = new ToolStripMenuItem();
+            salirToolStripMenuItem = new ToolStripMenuItem();
+            txtBase = new TextBox();
+            ((System.ComponentModel.ISupportInitialize)pbPreview).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pbMobile).BeginInit();
+            menuStrip1.SuspendLayout();
+            SuspendLayout();
+            // 
             // btnLoad
-            //
-            this.btnLoad.Location = new Point(20, 20);
-            this.btnLoad.Name = "btnLoad";
-            this.btnLoad.Size = new Size(140, 32);
-            this.btnLoad.Text = "Cargar imagen";
-            this.btnLoad.UseVisualStyleBackColor = true;
-            this.btnLoad.Click += new System.EventHandler(this.btnLoad_Click);
-            //
+            // 
+            btnLoad.Location = new Point(12, 231);
+            btnLoad.Margin = new Padding(3, 2, 3, 2);
+            btnLoad.Name = "btnLoad";
+            btnLoad.Size = new Size(122, 24);
+            btnLoad.TabIndex = 9;
+            btnLoad.Text = "Cargar imagen";
+            btnLoad.UseVisualStyleBackColor = true;
+            btnLoad.Click += btnLoad_Click;
+            // 
             // pbPreview
-            //
-            this.pbPreview.BorderStyle = BorderStyle.FixedSingle;
-            this.pbPreview.Location = new Point(20, 70);
-            this.pbPreview.Name = "pbPreview";
-            this.pbPreview.Size = new Size(300, 300);
-            this.pbPreview.SizeMode = PictureBoxSizeMode.Zoom;
-            this.pbPreview.AllowDrop = true;
-            this.pbPreview.BackgroundImageLayout = ImageLayout.Tile;
-            this.pbPreview.DragEnter += new DragEventHandler(this.MainForm_DragEnter);
-            this.pbPreview.DragDrop += new DragEventHandler(this.MainForm_DragDrop);
-            //
+            // 
+            pbPreview.AllowDrop = true;
+            pbPreview.BorderStyle = BorderStyle.FixedSingle;
+            pbPreview.Location = new Point(12, 54);
+            pbPreview.Margin = new Padding(3, 2, 3, 2);
+            pbPreview.Name = "pbPreview";
+            pbPreview.Size = new Size(200, 173);
+            pbPreview.SizeMode = PictureBoxSizeMode.Zoom;
+            pbPreview.TabIndex = 10;
+            pbPreview.TabStop = false;
+            pbPreview.DragDrop += MainForm_DragDrop;
+            pbPreview.DragEnter += MainForm_DragEnter;
+            // 
             // lblSize
-            //
-            this.lblSize.AutoSize = true;
-            this.lblSize.Location = new Point(340, 80);
-            this.lblSize.Text = "Tamaño:";
-            //
+            // 
+            lblSize.AutoSize = true;
+            lblSize.Location = new Point(240, 57);
+            lblSize.Name = "lblSize";
+            lblSize.Size = new Size(53, 15);
+            lblSize.TabIndex = 11;
+            lblSize.Text = "Tamaño:";
+            // 
             // cbSize
-            //
-            this.cbSize.DropDownStyle = ComboBoxStyle.DropDownList;
-            this.cbSize.Location = new Point(410, 76);
-            this.cbSize.Name = "cbSize";
-            this.cbSize.Size = new Size(120, 28);
-            //
+            // 
+            cbSize.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbSize.Location = new Point(301, 54);
+            cbSize.Margin = new Padding(3, 2, 3, 2);
+            cbSize.Name = "cbSize";
+            cbSize.Size = new Size(106, 23);
+            cbSize.TabIndex = 12;
+            // 
             // lblBg
-            //
-            this.lblBg.AutoSize = true;
-            this.lblBg.Location = new Point(340, 120);
-            this.lblBg.Text = "Fondo:";
-            //
+            // 
+            lblBg.AutoSize = true;
+            lblBg.Location = new Point(240, 87);
+            lblBg.Name = "lblBg";
+            lblBg.Size = new Size(44, 15);
+            lblBg.TabIndex = 13;
+            lblBg.Text = "Fondo:";
+            // 
             // btnPickColor
-            //
-            this.btnPickColor.Location = new Point(410, 116);
-            this.btnPickColor.Size = new Size(80, 28);
-            this.btnPickColor.Text = "Color";
-            this.btnPickColor.Click += new System.EventHandler(this.btnPickColor_Click);
-            //
+            // 
+            btnPickColor.Location = new Point(301, 84);
+            btnPickColor.Margin = new Padding(3, 2, 3, 2);
+            btnPickColor.Name = "btnPickColor";
+            btnPickColor.Size = new Size(70, 21);
+            btnPickColor.TabIndex = 14;
+            btnPickColor.Text = "Color";
+            btnPickColor.Click += btnPickColor_Click;
+            // 
             // pnlColor
-            //
-            this.pnlColor.Location = new Point(500, 116);
-            this.pnlColor.Size = new Size(30, 28);
-            this.pnlColor.BackColor = Color.White;
-            this.pnlColor.BorderStyle = BorderStyle.FixedSingle;
-            //
+            // 
+            pnlColor.BackColor = Color.White;
+            pnlColor.BorderStyle = BorderStyle.FixedSingle;
+            pnlColor.Location = new Point(380, 84);
+            pnlColor.Margin = new Padding(3, 2, 3, 2);
+            pnlColor.Name = "pnlColor";
+            pnlColor.Size = new Size(26, 22);
+            pnlColor.TabIndex = 15;
+            // 
             // chkTransparent
-            //
-            this.chkTransparent.AutoSize = true;
-            this.chkTransparent.Location = new Point(340, 160);
-            this.chkTransparent.Text = "Fondo transparente (PNG)";
-            this.chkTransparent.CheckedChanged += new System.EventHandler(this.chkTransparent_CheckedChanged);
-            //
-            // lblFormat
-            //
-            this.lblFormat.AutoSize = true;
-            this.lblFormat.Location = new Point(340, 200);
-            this.lblFormat.Text = "Formato:";
-            //
-            // cbFormat
-            //
-            this.cbFormat.DropDownStyle = ComboBoxStyle.DropDownList;
-            this.cbFormat.Location = new Point(410, 196);
-            this.cbFormat.Size = new Size(120, 28);
-            this.cbFormat.Items.AddRange(new object[] { "PNG", "JPG", "ICO" });
-            //
+            // 
+            chkTransparent.AutoSize = true;
+            chkTransparent.Location = new Point(243, 110);
+            chkTransparent.Margin = new Padding(3, 2, 3, 2);
+            chkTransparent.Name = "chkTransparent";
+            chkTransparent.Size = new Size(164, 19);
+            chkTransparent.TabIndex = 16;
+            chkTransparent.Text = "Fondo transparente (PNG)";
+            chkTransparent.CheckedChanged += chkTransparent_CheckedChanged;
+            // 
             // btnResize
-            //
-            this.btnResize.Location = new Point(340, 240);
-            this.btnResize.Size = new Size(120, 36);
-            this.btnResize.Text = "Redimensionar";
-            this.btnResize.FlatStyle = FlatStyle.Flat;
-            this.btnResize.BackColor = Color.FromArgb(255, 0, 0);
-            this.btnResize.ForeColor = Color.White;
-            this.btnResize.UseVisualStyleBackColor = false;
-            this.btnResize.Click += new System.EventHandler(this.btnResize_Click);
-            //
+            // 
+            btnResize.Location = new Point(12, 259);
+            btnResize.Margin = new Padding(3, 2, 3, 2);
+            btnResize.Name = "btnResize";
+            btnResize.Size = new Size(105, 27);
+            btnResize.TabIndex = 19;
+            btnResize.Text = "Redimensionar";
+            btnResize.Click += btnResize_Click;
+            // 
             // btnSaveOne
-            //
-            this.btnSaveOne.Location = new Point(470, 240);
-            this.btnSaveOne.Size = new Size(120, 36);
-            this.btnSaveOne.Text = "Guardar";
-            this.btnSaveOne.FlatStyle = FlatStyle.Standard;
-            this.btnSaveOne.Click += new System.EventHandler(this.btnSaveOne_Click);
-            //
+            // 
+            btnSaveOne.Location = new Point(123, 260);
+            btnSaveOne.Margin = new Padding(3, 2, 3, 2);
+            btnSaveOne.Name = "btnSaveOne";
+            btnSaveOne.Size = new Size(89, 27);
+            btnSaveOne.TabIndex = 20;
+            btnSaveOne.Text = "Guardar";
+            btnSaveOne.Click += btnSaveOne_Click;
+            // 
             // btnSaveBasics
-            //
-            this.btnSaveBasics.Location = new Point(340, 285);
-            this.btnSaveBasics.Size = new Size(250, 36);
-            this.btnSaveBasics.Text = "Guardar básicos";
-            this.btnSaveBasics.FlatStyle = FlatStyle.Flat;
-            this.btnSaveBasics.BackColor = Color.FromArgb(255, 0, 0);
-            this.btnSaveBasics.ForeColor = Color.White;
-            this.btnSaveBasics.UseVisualStyleBackColor = false;
-            this.btnSaveBasics.Click += new System.EventHandler(this.btnSaveBasics_Click);
-
-            // lblBase
-            this.lblBase.AutoSize = true;
-            this.lblBase.Location = new Point(340, 20);
-            this.lblBase.Text = "Nombre base:";
-
-            // txtBase
-            this.txtBase.Location = new Point(340, 42);
-            this.txtBase.Size = new Size(250, 27);
-
+            // 
+            btnSaveBasics.Location = new Point(243, 247);
+            btnSaveBasics.Margin = new Padding(3, 2, 3, 2);
+            btnSaveBasics.Name = "btnSaveBasics";
+            btnSaveBasics.Size = new Size(144, 27);
+            btnSaveBasics.TabIndex = 21;
+            btnSaveBasics.Text = "Guardar básicos";
+            btnSaveBasics.Click += btnSaveBasics_Click;
+            // 
+            // cbFormat
+            // 
+            cbFormat.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbFormat.Items.AddRange(new object[] { "PNG", "JPG", "ICO" });
+            cbFormat.Location = new Point(301, 133);
+            cbFormat.Margin = new Padding(3, 2, 3, 2);
+            cbFormat.Name = "cbFormat";
+            cbFormat.Size = new Size(106, 23);
+            cbFormat.TabIndex = 18;
+            // 
+            // lblFormat
+            // 
+            lblFormat.AutoSize = true;
+            lblFormat.Location = new Point(240, 136);
+            lblFormat.Name = "lblFormat";
+            lblFormat.Size = new Size(55, 15);
+            lblFormat.TabIndex = 17;
+            lblFormat.Text = "Formato:";
+            // 
             // btnSaveIcoMulti
-            this.btnSaveIcoMulti.Location = new Point(340, 330);
-            this.btnSaveIcoMulti.Size = new Size(250, 36);
-            this.btnSaveIcoMulti.Text = "Guardar ICO multi-tamaño";
-            this.btnSaveIcoMulti.Click += new System.EventHandler(this.btnSaveIcoMulti_Click);
-
+            // 
+            btnSaveIcoMulti.Location = new Point(243, 278);
+            btnSaveIcoMulti.Margin = new Padding(3, 2, 3, 2);
+            btnSaveIcoMulti.Name = "btnSaveIcoMulti";
+            btnSaveIcoMulti.Size = new Size(164, 27);
+            btnSaveIcoMulti.TabIndex = 2;
+            btnSaveIcoMulti.Text = "Guardar ICO multi-tamaño";
+            btnSaveIcoMulti.Click += btnSaveIcoMulti_Click;
+            // 
             // lblMobile
-            this.lblMobile.AutoSize = true;
-            this.lblMobile.Location = new Point(20, 380);
-            this.lblMobile.Text = "Vista móvil";
-
+            // 
+            lblMobile.AutoSize = true;
+            lblMobile.Location = new Point(333, 187);
+            lblMobile.Name = "lblMobile";
+            lblMobile.Size = new Size(65, 15);
+            lblMobile.TabIndex = 3;
+            lblMobile.Text = "Vista móvil";
+            // 
             // pbMobile
-            this.pbMobile.BorderStyle = BorderStyle.FixedSingle;
-            this.pbMobile.Location = new Point(20, 405);
-            this.pbMobile.Name = "pbMobile";
-            this.pbMobile.Size = new Size(96, 96);
-            this.pbMobile.SizeMode = PictureBoxSizeMode.Zoom;
-            this.pbMobile.BackgroundImageLayout = ImageLayout.Tile;
-
+            // 
+            pbMobile.BorderStyle = BorderStyle.FixedSingle;
+            pbMobile.Location = new Point(243, 164);
+            pbMobile.Margin = new Padding(3, 2, 3, 2);
+            pbMobile.Name = "pbMobile";
+            pbMobile.Size = new Size(84, 72);
+            pbMobile.SizeMode = PictureBoxSizeMode.Zoom;
+            pbMobile.TabIndex = 4;
+            pbMobile.TabStop = false;
+            // 
             // lblManifest
-            this.lblManifest.AutoSize = true;
-            this.lblManifest.Location = new Point(140, 380);
-            this.lblManifest.Text = "Bloque Manifest";
-
+            // 
+            lblManifest.AutoSize = true;
+            lblManifest.Location = new Point(12, 304);
+            lblManifest.Name = "lblManifest";
+            lblManifest.Size = new Size(93, 15);
+            lblManifest.TabIndex = 5;
+            lblManifest.Text = "Bloque Manifest";
+            // 
             // txtManifest
-            this.txtManifest.Location = new Point(140, 405);
-            this.txtManifest.Multiline = true;
-            this.txtManifest.ScrollBars = ScrollBars.Vertical;
-            this.txtManifest.Size = new Size(450, 120);
-            this.txtManifest.ReadOnly = true;
-
+            // 
+            txtManifest.Location = new Point(9, 321);
+            txtManifest.Margin = new Padding(3, 2, 3, 2);
+            txtManifest.Multiline = true;
+            txtManifest.Name = "txtManifest";
+            txtManifest.ReadOnly = true;
+            txtManifest.ScrollBars = ScrollBars.Vertical;
+            txtManifest.Size = new Size(263, 73);
+            txtManifest.TabIndex = 6;
+            // 
             // btnGenManifest
-            this.btnGenManifest.Location = new Point(140, 530);
-            this.btnGenManifest.Size = new Size(150, 32);
-            this.btnGenManifest.Text = "Generar manifest";
-            this.btnGenManifest.Click += new System.EventHandler(this.btnGenManifest_Click);
-
+            // 
+            btnGenManifest.Location = new Point(278, 361);
+            btnGenManifest.Margin = new Padding(3, 2, 3, 2);
+            btnGenManifest.Name = "btnGenManifest";
+            btnGenManifest.Size = new Size(131, 24);
+            btnGenManifest.TabIndex = 7;
+            btnGenManifest.Text = "Generar manifest";
+            btnGenManifest.Click += btnGenManifest_Click;
+            // 
             // btnCopyManifest
-            this.btnCopyManifest.Location = new Point(300, 530);
-            this.btnCopyManifest.Size = new Size(150, 32);
-            this.btnCopyManifest.Text = "Copiar JSON";
-            this.btnCopyManifest.Click += new System.EventHandler(this.btnCopyManifest_Click);
-
-            // gbPaso1 (visual)
-            this.gbPaso1.Text = "Paso 1: Seleccionar imagen";
-            this.gbPaso1.Location = new Point(12, 8);
-            this.gbPaso1.Size = new Size(330, 372);
-
-            // gbPaso2 (visual)
-            this.gbPaso2.Text = "Paso 2: Configurar icono";
-            this.gbPaso2.Location = new Point(330, 8);
-            this.gbPaso2.Size = new Size(278, 372);
-            //
+            // 
+            btnCopyManifest.Location = new Point(278, 319);
+            btnCopyManifest.Margin = new Padding(3, 2, 3, 2);
+            btnCopyManifest.Name = "btnCopyManifest";
+            btnCopyManifest.Size = new Size(93, 24);
+            btnCopyManifest.TabIndex = 8;
+            btnCopyManifest.Text = "Copiar JSON";
+            btnCopyManifest.Click += btnCopyManifest_Click;
+            // 
+            // menuStrip1
+            // 
+            menuStrip1.Items.AddRange(new ToolStripItem[] { archivoToolStripMenuItem });
+            menuStrip1.Location = new Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new Size(416, 24);
+            menuStrip1.TabIndex = 0;
+            // 
+            // archivoToolStripMenuItem
+            // 
+            archivoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { salirToolStripMenuItem });
+            archivoToolStripMenuItem.Name = "archivoToolStripMenuItem";
+            archivoToolStripMenuItem.Size = new Size(60, 20);
+            archivoToolStripMenuItem.Text = "&Archivo";
+            // 
+            // salirToolStripMenuItem
+            // 
+            salirToolStripMenuItem.Name = "salirToolStripMenuItem";
+            salirToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Q;
+            salirToolStripMenuItem.Size = new Size(139, 22);
+            salirToolStripMenuItem.Text = "&Salir";
+            salirToolStripMenuItem.Click += salirToolStripMenuItem_Click;
+            // 
+            // txtBase
+            // 
+            txtBase.Location = new Point(140, 233);
+            txtBase.Margin = new Padding(3, 2, 3, 2);
+            txtBase.Name = "txtBase";
+            txtBase.Size = new Size(72, 23);
+            txtBase.TabIndex = 1;
+            // 
             // MainForm
-            //
-            this.AutoScaleDimensions = new SizeF(8F, 20F);
-            this.AutoScaleMode = AutoScaleMode.Font;
-            this.ClientSize = new Size(620, 580);
-            this.AllowDrop = true;
-            this.DragEnter += new DragEventHandler(this.MainForm_DragEnter);
-            this.DragDrop += new DragEventHandler(this.MainForm_DragDrop);
-            this.Controls.Add(this.gbPaso1);
-            this.Controls.Add(this.gbPaso2);
-            this.Controls.Add(this.lblBase);
-            this.Controls.Add(this.txtBase);
-            this.Controls.Add(this.btnSaveIcoMulti);
-            this.Controls.Add(this.lblMobile);
-            this.Controls.Add(this.pbMobile);
-            this.Controls.Add(this.lblManifest);
-            this.Controls.Add(this.txtManifest);
-            this.Controls.Add(this.btnGenManifest);
-            this.Controls.Add(this.btnCopyManifest);
-            this.Controls.Add(this.btnLoad);
-            this.Controls.Add(this.pbPreview);
-            this.Controls.Add(this.lblSize);
-            this.Controls.Add(this.cbSize);
-            this.Controls.Add(this.lblBg);
-            this.Controls.Add(this.btnPickColor);
-            this.Controls.Add(this.pnlColor);
-            this.Controls.Add(this.chkTransparent);
-            this.Controls.Add(this.lblFormat);
-            this.Controls.Add(this.cbFormat);
-            this.Controls.Add(this.btnResize);
-            this.Controls.Add(this.btnSaveOne);
-            this.Controls.Add(this.btnSaveBasics);
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
-            this.Name = "MainForm";
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.Text = "Redimensionar Icono (WinForms)";
-            ((System.ComponentModel.ISupportInitialize)(this.pbPreview)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbMobile)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            // 
+            AllowDrop = true;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(416, 404);
+            Controls.Add(txtBase);
+            Controls.Add(menuStrip1);
+            Controls.Add(btnSaveIcoMulti);
+            Controls.Add(lblMobile);
+            Controls.Add(pbMobile);
+            Controls.Add(lblManifest);
+            Controls.Add(txtManifest);
+            Controls.Add(btnGenManifest);
+            Controls.Add(btnCopyManifest);
+            Controls.Add(btnLoad);
+            Controls.Add(pbPreview);
+            Controls.Add(lblSize);
+            Controls.Add(cbSize);
+            Controls.Add(lblBg);
+            Controls.Add(btnPickColor);
+            Controls.Add(pnlColor);
+            Controls.Add(chkTransparent);
+            Controls.Add(lblFormat);
+            Controls.Add(cbFormat);
+            Controls.Add(btnResize);
+            Controls.Add(btnSaveOne);
+            Controls.Add(btnSaveBasics);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MainMenuStrip = menuStrip1;
+            Margin = new Padding(3, 2, 3, 2);
+            MaximizeBox = false;
+            Name = "MainForm";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Redimensionar Icono (WinForms)";
+            Load += MainForm_Load;
+            DragDrop += MainForm_DragDrop;
+            DragEnter += MainForm_DragEnter;
+            ((System.ComponentModel.ISupportInitialize)pbPreview).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pbMobile).EndInit();
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         private Button btnLoad;
@@ -268,10 +339,6 @@ namespace RedimensionarIcono.WinForms
         private Button btnSaveBasics;
         private ComboBox cbFormat;
         private Label lblFormat;
-        private GroupBox gbPaso1;
-        private GroupBox gbPaso2;
-        private Label lblBase;
-        private TextBox txtBase;
         private Button btnSaveIcoMulti;
         private Label lblMobile;
         private PictureBox pbMobile;
@@ -279,5 +346,9 @@ namespace RedimensionarIcono.WinForms
         private TextBox txtManifest;
         private Button btnGenManifest;
         private Button btnCopyManifest;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem archivoToolStripMenuItem;
+        private ToolStripMenuItem salirToolStripMenuItem;
+        private TextBox txtBase;
     }
 }
