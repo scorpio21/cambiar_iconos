@@ -373,9 +373,9 @@ namespace RedimensionarIcono.WinForms
             var baseName = string.IsNullOrWhiteSpace(txtBase.Text) ? "icon" : SanitizeBase(txtBase.Text);
             bool transparent = chkTransparent.Checked;
             bool includeManifest = !string.IsNullOrWhiteSpace(txtManifest.Text);
-            // Selección de tamaños
+            // Selección de tamaños (con sugeridos persistidos)
             int[] selectedSizes;
-            using (var dlgSizes = new SeleccionarTamanosDialog(new[] { 16, 20, 24, 32, 48, 64, 96, 128, 180, 192, 256, 512 }))
+            using (var dlgSizes = new SeleccionarTamanosDialog(IconService.GetSuggestedSizesForZip()))
             {
                 if (dlgSizes.ShowDialog(this) != DialogResult.OK) return;
                 selectedSizes = dlgSizes.TamanosSeleccionados;
@@ -391,6 +391,7 @@ namespace RedimensionarIcono.WinForms
                 try
                 {
                     PackageService.ExportZipAsDll(this, _original, baseName, transparent ? (Color?)null : _bgColor, includeManifest, dlg.FileName, selectedSizes);
+                    IconService.SaveLastSizesForZip(selectedSizes);
                     MessageBox.Show(this, "Paquete exportado.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -410,9 +411,9 @@ namespace RedimensionarIcono.WinForms
             }
             var baseName = string.IsNullOrWhiteSpace(txtBase.Text) ? "icon" : SanitizeBase(txtBase.Text);
             bool transparent = chkTransparent.Checked;
-            // Selección de tamaños
+            // Selección de tamaños (con sugeridos persistidos)
             int[] selectedSizes;
-            using (var dlgSizes = new SeleccionarTamanosDialog(new[] { 16, 32, 48, 64, 128, 256 }))
+            using (var dlgSizes = new SeleccionarTamanosDialog(IconService.GetSuggestedSizesForRes()))
             {
                 if (dlgSizes.ShowDialog(this) != DialogResult.OK) return;
                 selectedSizes = dlgSizes.TamanosSeleccionados;
@@ -428,6 +429,7 @@ namespace RedimensionarIcono.WinForms
                 try
                 {
                     PackageService.ExportResourceDll(this, _original, baseName, transparent ? (Color?)null : _bgColor, dlg.FileName, selectedSizes);
+                    IconService.SaveLastSizesForRes(selectedSizes);
                     MessageBox.Show(this, "DLL de recursos exportado.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
