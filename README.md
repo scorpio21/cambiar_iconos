@@ -1,7 +1,7 @@
 # Cambiar Iconos (WinForms .NET)
 
 <p align="center">
-  <img src="img/aplica.png" alt="Captura de la aplicación" width="600" />
+  <img src="img/aplica.png" alt="Captura de la aplicación" width="400" />
 </p>
 
 Aplicación de escritorio (Windows Forms, .NET 8) para redimensionar imágenes a tamaños comunes de iconos y generar recursos (PNG/JPG/ICO) y bloque de manifest.
