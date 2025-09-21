@@ -229,8 +229,8 @@ namespace RedimensionarIcono.WinForms.Services
         {
             try
             {
-                IntPtr[] largeArr = large ? new IntPtr[1] : null;
-                IntPtr[] smallArr = !large ? new IntPtr[1] : null;
+                IntPtr[]? largeArr = large ? new IntPtr[1] : null;
+                IntPtr[]? smallArr = !large ? new IntPtr[1] : null;
                 uint count = ExtractIconEx(path, index, largeArr, smallArr, 1);
                 if (count == 0) return null;
                 IntPtr hIcon = large ? (largeArr![0]) : (smallArr![0]);

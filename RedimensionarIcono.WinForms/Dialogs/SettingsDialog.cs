@@ -26,18 +26,42 @@ namespace RedimensionarIcono.WinForms.Dialogs
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
-            ClientSize = new Size(560, 145);
+            ClientSize = new Size(640, 180);
 
-            var lblRc = new Label { Left = 12, Top = 20, Text = "Ruta rc.exe:", AutoSize = true };
-            _txtRc = new TextBox { Left = 100, Top = 16, Width = 360 };
-            _btnBrowseRc = new Button { Left = 470, Top = 15, Width = 75, Text = "Buscar" };
+            var tlp = new TableLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                ColumnCount = 3,
+                RowCount = 2,
+                Padding = new Padding(10),
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink
+            };
+            tlp.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+            tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90f));
 
-            var lblLink = new Label { Left = 12, Top = 60, Text = "Ruta link.exe:", AutoSize = true };
-            _txtLink = new TextBox { Left = 100, Top = 56, Width = 360 };
-            _btnBrowseLink = new Button { Left = 470, Top = 55, Width = 75, Text = "Buscar" };
+            var lblRc = new Label { Text = "Ruta rc.exe:", AutoSize = true, Anchor = AnchorStyles.Left };
+            _txtRc = new TextBox { Anchor = AnchorStyles.Left | AnchorStyles.Right };
+            _btnBrowseRc = new Button { Text = "Buscar", Width = 80, Anchor = AnchorStyles.Right };
 
-            _btnOk = new Button { Left = 380, Top = 100, Width = 80, Text = "Aceptar" };
-            _btnCancel = new Button { Left = 470, Top = 100, Width = 80, Text = "Cancelar" };
+            var lblLink = new Label { Text = "Ruta link.exe:", AutoSize = true, Anchor = AnchorStyles.Left };
+            _txtLink = new TextBox { Anchor = AnchorStyles.Left | AnchorStyles.Right };
+            _btnBrowseLink = new Button { Text = "Buscar", Width = 80, Anchor = AnchorStyles.Right };
+
+            tlp.Controls.Add(lblRc, 0, 0);
+            tlp.Controls.Add(_txtRc, 1, 0);
+            tlp.Controls.Add(_btnBrowseRc, 2, 0);
+            tlp.Controls.Add(lblLink, 0, 1);
+            tlp.Controls.Add(_txtLink, 1, 1);
+            tlp.Controls.Add(_btnBrowseLink, 2, 1);
+
+            var pnlButtons = new Panel { Dock = DockStyle.Bottom, Height = 48, Padding = new Padding(10, 5, 10, 10) };
+            var flow = new FlowLayoutPanel { Dock = DockStyle.Right, FlowDirection = FlowDirection.LeftToRight, AutoSize = true };
+            _btnOk = new Button { Text = "Aceptar", Width = 90 };
+            _btnCancel = new Button { Text = "Cancelar", Width = 90 };
+            flow.Controls.AddRange(new Control[] { _btnOk, _btnCancel });
+            pnlButtons.Controls.Add(flow);
 
             _btnBrowseRc.Click += (_, __) => BrowseExe(_txtRc, "rc.exe|rc.exe|Todos (*.*)|*.*");
             _btnBrowseLink.Click += (_, __) => BrowseExe(_txtLink, "link.exe|link.exe|Todos (*.*)|*.*");
@@ -48,7 +72,8 @@ namespace RedimensionarIcono.WinForms.Dialogs
             };
             _btnCancel.Click += (_, __) => DialogResult = DialogResult.Cancel;
 
-            Controls.AddRange(new Control[] { lblRc, _txtRc, _btnBrowseRc, lblLink, _txtLink, _btnBrowseLink, _btnOk, _btnCancel });
+            Controls.Add(pnlButtons);
+            Controls.Add(tlp);
 
             // Cargar valores actuales
             _txtRc.Text = IconService.GetRcPath() ?? string.Empty;

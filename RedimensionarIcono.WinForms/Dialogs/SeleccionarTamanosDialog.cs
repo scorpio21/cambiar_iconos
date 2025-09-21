@@ -23,12 +23,11 @@ namespace RedimensionarIcono.WinForms.Dialogs
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
-            ClientSize = new Size(260, 320);
+            ClientSize = new Size(280, 360);
 
             _list = new CheckedListBox
             {
-                Dock = DockStyle.Top,
-                Height = 230
+                Dock = DockStyle.Fill
             };
 
             var tamanos = sugeridos.Distinct().OrderBy(x => x).ToArray();
@@ -41,10 +40,14 @@ namespace RedimensionarIcono.WinForms.Dialogs
                 _list.Items.Add(t, true);
             }
 
-            _btnTodos = new Button { Text = "Todos", Left = 10, Top = 240, Width = 60 };
-            _btnNinguno = new Button { Text = "Ninguno", Left = 80, Top = 240, Width = 70 };
-            _btnOk = new Button { Text = "Aceptar", Left = 160, Top = 240, Width = 80 };
-            _btnCancelar = new Button { Text = "Cancelar", Left = 160, Top = 275, Width = 80 };
+            var pnlButtons = new Panel { Dock = DockStyle.Bottom, Height = 50, Padding = new Padding(10) };
+            var flow = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight };
+            _btnTodos = new Button { Text = "Todos", Width = 70 };
+            _btnNinguno = new Button { Text = "Ninguno", Width = 80 };
+            _btnOk = new Button { Text = "Aceptar", Width = 80 };
+            _btnCancelar = new Button { Text = "Cancelar", Width = 80 };
+            flow.Controls.AddRange(new Control[] { _btnTodos, _btnNinguno, _btnOk, _btnCancelar });
+            pnlButtons.Controls.Add(flow);
 
             _btnTodos.Click += (_, __) =>
             {
@@ -66,7 +69,7 @@ namespace RedimensionarIcono.WinForms.Dialogs
             };
             _btnCancelar.Click += (_, __) => { DialogResult = DialogResult.Cancel; };
 
-            Controls.AddRange(new Control[] { _list, _btnTodos, _btnNinguno, _btnOk, _btnCancelar });
+            Controls.AddRange(new Control[] { _list, pnlButtons });
         }
     }
 }
