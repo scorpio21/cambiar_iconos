@@ -11,7 +11,7 @@ namespace RedimensionarIcono.WinForms.Services
     internal static class PackageService
     {
         // Crea un paquete ZIP con extensión .dll que contiene PNGs básicos y manifest.json
-        public static void ExportZipAsDll(Form owner, Bitmap original, string baseName, Color? bg, bool includeManifest, string destinationPath, int[]? sizes = null)
+        public static void ExportZipAsDll(Form owner, Bitmap original, string baseName, Color? bg, bool includeManifest, string destinationPath, int[]? sizes = null, string[]? extraFiles = null)
         {
             var basics = sizes ?? new[] { 16, 20, 24, 32, 180, 192, 512 };
             var tempDir = Path.Combine(Path.GetTempPath(), "pkg_" + Guid.NewGuid().ToString("N"));
@@ -23,10 +23,56 @@ namespace RedimensionarIcono.WinForms.Services
                 // Generar PNGs
                 foreach (var s in basics)
                 {
-                    using var bmp = ImageService.Redimensionar(original, s, s, bg);
                     var outPath = Path.Combine(imgDir, $"{baseName}-{s}x{s}.png");
-                    bmp.Save(outPath, System.Drawing.Imaging.ImageFormat.Png);
+                    // Intentar reutilizar si ya existe en img/png del proyecto
+                    var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                    var existing = Path.Combine(baseDir, "img", "png", $"{baseName}-{s}x{s}.png");
+                    if (File.Exists(existing))
+                    {
+                        File.Copy(existing, outPath, overwrite: true);
+                    }
+                    else
+                    {
+                        using var bmp = ImageService.Redimensionar(original, s, s, bg);
+                        bmp.Save(outPath, System.Drawing.Imaging.ImageFormat.Png);
+                    }
                 }
+                // Incluir ficheros adicionales si se solicitaron (png/ico)
+                if (extraFiles != null)
+                {
+                    foreach (var f in extraFiles.Where(File.Exists))
+                    {
+                        var ext = Path.GetExtension(f).ToLowerInvariant();
+                        if (ext == ".png")
+                        {
+                            var dst = Path.Combine(imgDir, Path.GetFileName(f));
+                            File.Copy(f, dst, overwrite: true);
+                        }
+                        else if (ext == ".ico")
+                        {
+                            var icoDir = Path.Combine(tempDir, "img", "ico");
+                            Directory.CreateDirectory(icoDir);
+                            var dst = Path.Combine(icoDir, Path.GetFileName(f));
+                            File.Copy(f, dst, overwrite: true);
+                        }
+                        else if (ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".gif" || ext == ".webp")
+                        {
+                            // Convertir a PNG dentro del paquete
+                            var name = Path.GetFileNameWithoutExtension(f) + ".png";
+                            var dst = Path.Combine(imgDir, name);
+                            try
+                            {
+                                using var bmp = new Bitmap(f);
+                                bmp.Save(dst, System.Drawing.Imaging.ImageFormat.Png);
+                            }
+                            catch
+                            {
+                                // Si falla la conversión, ignoramos ese archivo
+                            }
+                        }
+                    }
+                }
+
                 // Manifest opcional
                 if (includeManifest)
                 {
@@ -47,7 +93,7 @@ namespace RedimensionarIcono.WinForms.Services
         }
 
         // Intenta crear un DLL de recursos (resource-only) con ICONs generados
-        public static void ExportResourceDll(Form owner, Bitmap original, string baseName, Color? bg, string destinationPath, int[]? sizes = null)
+        public static void ExportResourceDll(Form owner, Bitmap original, string baseName, Color? bg, string destinationPath, int[]? sizes = null, string[]? extraIcoFiles = null)
         {
             // Verificar herramientas
             var rcPath = FindOnPath("rc.exe");
@@ -69,10 +115,43 @@ namespace RedimensionarIcono.WinForms.Services
                 for (int i = 0; i < sizesArr.Length; i++)
                 {
                     int s = sizesArr[i];
-                    using var bmp = ImageService.Redimensionar(original, s, s, bg);
+                    // Intentar cargar PNG existente si está en img/png
+                    Bitmap bmp;
+                    var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                    var existingPng = Path.Combine(baseDir, "img", "png", $"{baseName}-{s}x{s}.png");
+                    if (File.Exists(existingPng))
+                    {
+                        bmp = new Bitmap(existingPng);
+                    }
+                    else
+                    {
+                        bmp = ImageService.Redimensionar(original, s, s, bg);
+                    }
                     var icoPath = Path.Combine(tempDir, $"icon_{s}.ico");
-                    IcoService.SaveSingleIco(bmp, icoPath);
+                    try
+                    {
+                        IcoService.SaveSingleIco(bmp, icoPath);
+                    }
+                    finally
+                    {
+                        bmp.Dispose();
+                    }
                 }
+                // Incluir .ico adicionales proporcionados por el usuario
+                var extraIcons = new List<string>();
+                if (extraIcoFiles != null)
+                {
+                    foreach (var f in extraIcoFiles.Where(File.Exists))
+                    {
+                        if (Path.GetExtension(f).Equals(".ico", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var dst = Path.Combine(tempDir, Path.GetFileName(f));
+                            File.Copy(f, dst, overwrite: true);
+                            extraIcons.Add(Path.GetFileName(f));
+                        }
+                    }
+                }
+
                 // .rc
                 var rcPathFile = Path.Combine(tempDir, "icons.rc");
                 using (var sw = new StreamWriter(rcPathFile, false))
@@ -80,6 +159,10 @@ namespace RedimensionarIcono.WinForms.Services
                     foreach (var s in sizesArr)
                     {
                         sw.WriteLine($"IDI_ICON_{s} ICON \"icon_{s}.ico\"");
+                    }
+                    for (int i = 0; i < extraIcons.Count; i++)
+                    {
+                        sw.WriteLine($"IDI_ICON_EXTRA_{i} ICON \"{extraIcons[i]}\"");
                     }
                 }
                 // rc.exe -> .res

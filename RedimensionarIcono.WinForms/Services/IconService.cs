@@ -19,6 +19,8 @@ namespace RedimensionarIcono.WinForms.Services
             public string? SavedIconPng { get; set; }
             public int[]? LastSizesZip { get; set; }
             public int[]? LastSizesRes { get; set; }
+            public string? RcPath { get; set; }
+            public string? LinkPath { get; set; }
         }
 
         private static readonly string ConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
@@ -85,6 +87,18 @@ namespace RedimensionarIcono.WinForms.Services
             if (!ok) return;
 
             var chosenPath = sb.ToString();
+            // Validar DLL que en realidad es ZIP renombrado (cabecera PK)
+            try
+            {
+                if (Path.GetExtension(chosenPath).Equals(".dll", StringComparison.OrdinalIgnoreCase) && IsZipFile(chosenPath))
+                {
+                    MessageBox.Show(form,
+                        "El archivo seleccionado parece un paquete .zip renombrado (.dll). No contiene iconos como recursos.",
+                        "Archivo no válido para iconos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+            catch { /* ignore */ }
             try
             {
                 using var ico = ExtractIcon(chosenPath, iconIndex, large: true);
@@ -95,10 +109,17 @@ namespace RedimensionarIcono.WinForms.Services
                     form.Icon = (Icon)ico.Clone();
                     var bmp = ico.ToBitmap();
                     pbMobile.Image = bmp;
+                    // Carpetas de salida organizadas
+                    var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                    var dirIco = Path.Combine(baseDir, "img", "ico");
+                    var dirPng = Path.Combine(baseDir, "img", "png");
+                    Directory.CreateDirectory(dirIco);
+                    Directory.CreateDirectory(dirPng);
 
                     var baseName = Path.GetFileNameWithoutExtension(chosenPath);
-                    var icoOut = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{baseName}_{iconIndex}.ico");
-                    var pngOut = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{baseName}_{iconIndex}.png");
+                    var icoOut = Path.Combine(dirIco, $"{baseName}_{iconIndex}.ico");
+                    var pngOut = Path.Combine(dirPng, $"{baseName}_{iconIndex}.png");
+                    // Guardar .ico (icono único) y .png
                     using (var fs = new FileStream(icoOut, FileMode.Create, FileAccess.Write))
                     {
                         ico.Save(fs);
@@ -115,6 +136,20 @@ namespace RedimensionarIcono.WinForms.Services
             {
                 MessageBox.Show(form, "No se pudo guardar la configuración: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private static bool IsZipFile(string path)
+        {
+            try
+            {
+                using var fs = File.OpenRead(path);
+                if (fs.Length < 4) return false;
+                Span<byte> sig = stackalloc byte[4];
+                fs.Read(sig);
+                // PK\x03\x04
+                return sig[0] == 0x50 && sig[1] == 0x4B && sig[2] == 0x03 && sig[3] == 0x04;
+            }
+            catch { return false; }
         }
 
         // Sugerencias de tamaños persistentes para exportaciones
@@ -145,6 +180,31 @@ namespace RedimensionarIcono.WinForms.Services
         {
             var cfg = Load() ?? new AppConfig();
             cfg.LastSizesRes = sizes?.Distinct().OrderBy(x => x).ToArray();
+            Save(cfg);
+        }
+
+        // Rutas configurables para rc.exe / link.exe
+        public static string? GetRcPath()
+        {
+            return Load()?.RcPath;
+        }
+
+        public static string? GetLinkPath()
+        {
+            return Load()?.LinkPath;
+        }
+
+        public static void SetRcPath(string? path)
+        {
+            var cfg = Load() ?? new AppConfig();
+            cfg.RcPath = path;
+            Save(cfg);
+        }
+
+        public static void SetLinkPath(string? path)
+        {
+            var cfg = Load() ?? new AppConfig();
+            cfg.LinkPath = path;
             Save(cfg);
         }
 

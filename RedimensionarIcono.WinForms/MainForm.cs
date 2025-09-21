@@ -249,24 +249,6 @@ namespace RedimensionarIcono.WinForms
             }
         }
 
-        // Actualiza las opciones del combo de formato en función de la transparencia
-        private void UpdateFormatOptions()
-        {
-            var current = (cbFormat.SelectedItem?.ToString() ?? "PNG").ToUpperInvariant();
-            var transparent = chkTransparent.Checked;
-            cbFormat.Items.Clear();
-            if (transparent)
-            {
-                cbFormat.Items.AddRange(new object[] { "PNG", "ICO" });
-                if (current == "JPG") current = "PNG";
-            }
-            else
-            {
-                cbFormat.Items.AddRange(new object[] { "PNG", "JPG", "ICO" });
-            }
-            var idx = cbFormat.Items.IndexOf(current);
-            cbFormat.SelectedIndex = idx >= 0 ? idx : 0;
-        }
 
         // --- Drag & Drop ---
         private void MainForm_DragEnter(object? sender, DragEventArgs e)
@@ -380,17 +362,32 @@ namespace RedimensionarIcono.WinForms
                 if (dlgSizes.ShowDialog(this) != DialogResult.OK) return;
                 selectedSizes = dlgSizes.TamanosSeleccionados;
             }
+            // Permitir añadir archivos extra (png/ico)
+            string[] extraFiles = Array.Empty<string>();
+            using (var addDlg = new OpenFileDialog
+            {
+                Title = "Añadir imágenes opcionales (PNG/ICO)",
+                Filter = "Imágenes|*.png;*.ico|PNG (*.png)|*.png|ICO (*.ico)|*.ico|Todos (*.*)|*.*",
+                Multiselect = true
+            })
+            {
+                if (addDlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    extraFiles = addDlg.FileNames;
+                }
+            }
+
             using var dlg = new SaveFileDialog
             {
-                Title = "Exportar paquete (.dll contenedor)",
-                FileName = baseName + ".dll",
-                Filter = "Paquete (*.dll)|*.dll"
+                Title = "Exportar paquete (.zip)",
+                FileName = baseName + ".zip",
+                Filter = "Paquete ZIP (*.zip)|*.zip"
             };
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 try
                 {
-                    PackageService.ExportZipAsDll(this, _original, baseName, transparent ? (Color?)null : _bgColor, includeManifest, dlg.FileName, selectedSizes);
+                    PackageService.ExportZipAsDll(this, _original, baseName, transparent ? (Color?)null : _bgColor, includeManifest, dlg.FileName, selectedSizes, extraFiles);
                     IconService.SaveLastSizesForZip(selectedSizes);
                     MessageBox.Show(this, "Paquete exportado.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -418,6 +415,21 @@ namespace RedimensionarIcono.WinForms
                 if (dlgSizes.ShowDialog(this) != DialogResult.OK) return;
                 selectedSizes = dlgSizes.TamanosSeleccionados;
             }
+            // Permitir añadir ICO extra
+            string[] extraIcos = Array.Empty<string>();
+            using (var addDlg = new OpenFileDialog
+            {
+                Title = "Añadir iconos (.ico) opcionales",
+                Filter = "ICO (*.ico)|*.ico",
+                Multiselect = true
+            })
+            {
+                if (addDlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    extraIcos = addDlg.FileNames;
+                }
+            }
+
             using var dlg = new SaveFileDialog
             {
                 Title = "Exportar recursos (DLL nativo)",
@@ -428,7 +440,7 @@ namespace RedimensionarIcono.WinForms
             {
                 try
                 {
-                    PackageService.ExportResourceDll(this, _original, baseName, transparent ? (Color?)null : _bgColor, dlg.FileName, selectedSizes);
+                    PackageService.ExportResourceDll(this, _original, baseName, transparent ? (Color?)null : _bgColor, dlg.FileName, selectedSizes, extraIcos);
                     IconService.SaveLastSizesForRes(selectedSizes);
                     MessageBox.Show(this, "DLL de recursos exportado.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -463,25 +475,21 @@ namespace RedimensionarIcono.WinForms
             IconService.LoadAndApplySavedIcon(this, pbMobile);
         }
 
-        // Helper para simular transparencia reparentando el control al host
-        private void MakeTransparentOn(Control ctrl, Control host)
-        {
-            if (ctrl == null || host == null || ctrl.Parent == host) return;
-            // Coordenadas absolutas actuales
-            var screenPos = ctrl.Parent != null
-                ? ctrl.Parent.PointToScreen(ctrl.Location)
-                : this.PointToScreen(ctrl.Location);
-            // Nueva ubicación relativa al host
-            var newPos = host.PointToClient(screenPos);
-            ctrl.Parent = host;
-            ctrl.Location = newPos;
-            ctrl.BackColor = Color.Transparent;
-            ctrl.BringToFront();
-        }
 
         private void seleccionarIconoToolStripMenuItem_Click(object? sender, EventArgs e)
         {
             IconService.ChooseAndSaveIcon(this, pbMobile);
+        }
+
+        private void ajustesToolStripMenuItem_Click(object? sender, EventArgs e)
+        {
+            using var dlg = new Dialogs.SettingsDialog();
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                IconService.SetRcPath(dlg.RcPath);
+                IconService.SetLinkPath(dlg.LinkPath);
+                MessageBox.Show(this, "Ajustes guardados.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
     }
 }
