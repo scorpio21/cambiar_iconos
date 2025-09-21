@@ -2,6 +2,7 @@
 .vs/
 **/bin/
 **/obj/
+dist/
 # User-specific
 *.user
 *.suo
@@ -12,4 +13,3 @@
 # OS
 Thumbs.db
 Desktop.ini
-dist/
