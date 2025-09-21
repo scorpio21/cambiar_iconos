@@ -3,11 +3,17 @@
 **/bin/
 **/obj/
 dist/
+publish/
+releases/
+*.zip
 # User-specific
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
+# IDEs
+.vscode/
+.idea/
 # Logs
 *.log
 # OS
