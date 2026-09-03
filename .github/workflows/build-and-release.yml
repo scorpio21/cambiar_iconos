@@ -1,0 +1,119 @@
+name: build-and-release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Versión (ej. 1.1.1)"
+        required: true
+        default: "1.1.1"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      RELEASE_VERSION: ${{ github.event.inputs.version || '1.1.1' }}
+      APP_NAME: RedimensionarIcono.WinForms
+      PROJECT_FILE: RedimensionarIcono.WinForms/RedimensionarIcono.WinForms.csproj
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Determinar versión
+        shell: pwsh
+        run: |
+          if ("${{ startsWith(github.ref, 'refs/tags/v') }}" -eq 'True') {
+            $version = "${{ github.ref_name }}".Substring(1)
+          } else {
+            $version = "${{ env.RELEASE_VERSION }}"
+          }
+          "RELEASE_VERSION=$version" >> $env:GITHUB_ENV
+
+      - name: Restore
+        run: dotnet restore ${{ env.PROJECT_FILE }}
+
+      - name: Publish win-x64 self-contained
+        run: >
+          dotnet publish ${{ env.PROJECT_FILE }} -c Release -r win-x64 --self-contained true
+          /p:PublishSingleFile=true /p:PublishTrimmed=false -o publish/win-x64-selfcontained
+
+      - name: Publish win-x86 self-contained
+        run: >
+          dotnet publish ${{ env.PROJECT_FILE }} -c Release -r win-x86 --self-contained true
+          /p:PublishSingleFile=true /p:PublishTrimmed=false -o publish/win-x86-selfcontained
+
+      - name: Publish win-x64 framework
+        run: >
+          dotnet publish ${{ env.PROJECT_FILE }} -c Release -r win-x64 --self-contained false
+          /p:PublishSingleFile=true -o publish/win-x64-framework
+
+      - name: Publish win-x86 framework
+        run: >
+          dotnet publish ${{ env.PROJECT_FILE }} -c Release -r win-x86 --self-contained false
+          /p:PublishSingleFile=true -o publish/win-x86-framework
+
+      - name: Crear ZIPs
+        shell: pwsh
+        run: |
+          $version="${{ env.RELEASE_VERSION }}"
+          Compress-Archive -Force publish/win-x64-selfcontained/*     "publish/${{ env.APP_NAME }}-v${version}-win-x64-selfcontained.zip"
+          Compress-Archive -Force publish/win-x86-selfcontained/*     "publish/${{ env.APP_NAME }}-v${version}-win-x86-selfcontained.zip"
+          Compress-Archive -Force publish/win-x64-framework/*         "publish/${{ env.APP_NAME }}-v${version}-win-x64.zip"
+          Compress-Archive -Force publish/win-x86-framework/*         "publish/${{ env.APP_NAME }}-v${version}-win-x86.zip"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReleaseFiles
+          path: |
+            publish/${{ env.APP_NAME }}-v*.zip
+          retention-days: 1
+
+      - name: Preparar changelog
+        if: github.event_name == 'workflow_dispatch' || startsWith(github.ref,'refs/tags/v')
+        shell: pwsh
+        run: |
+          $version="${{ env.RELEASE_VERSION }}"
+          $c=Get-Content CHANGELOG.md
+          $m=$c|Select-String "## [$version]" -SimpleMatch|Select-Object -First 1
+          if(!$m){$m=$c|Select-String "## v$version" -SimpleMatch|Select-Object -First 1}
+          if(!$m){exit 1}
+
+          $start=$m.LineNumber-1
+          $rest=$c[$start..($c.Length-1)]
+          $next=$rest|Select-String '^## ' | Select-Object -Skip 1 -First 1
+
+          if($next){
+            $slice=$rest[0..($next.LineNumber-2)]
+          }else{
+            $slice=$rest
+          }
+
+          Set-Content CHANGELOG_RELEASE.md $slice
+
+      - name: Create GitHub Release
+        if: github.event_name == 'workflow_dispatch' || startsWith(github.ref,'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.RELEASE_VERSION }}
+          name: v${{ env.RELEASE_VERSION }}
+          body_path: CHANGELOG_RELEASE.md
+          files: |
+            publish/${{ env.APP_NAME }}-v*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
