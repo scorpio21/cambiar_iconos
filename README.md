@@ -8,7 +8,8 @@ Aplicación de escritorio (Windows Forms, .NET 8) para redimensionar imágenes a
 
 ## Funcionalidad
 
-- Cargar imagen (PNG/JPG/JPEG/WEBP/BMP/GIF) y arrastrar y soltar (drag & drop).
+- Cargar imagen (PNG/JPG/JPEG/WEBP/BMP/GIF/**SVG**) y arrastrar y soltar (drag & drop).
+- **Soporte SVG:** carga iconos vectoriales SVG que se renderizan a 512px automáticamente vía SkiaSharp.
 - Selector de tamaños: 16, 20, 24, 32, 36, 48, 72, 96, 120, 144, 152, 167, 180, 192, 256, 384, 512.
 - Fondo de color o fondo transparente (PNG).
 - Redimensionar y previsualizar.
@@ -44,6 +45,7 @@ Aplicación de escritorio (Windows Forms, .NET 8) para redimensionar imágenes a
 - Transparencia: JPG no soporta alfa; si marcas "Fondo transparente (PNG)", se fuerza PNG para preservar transparencia.
 - ICO: "Guardar" con formato ICO guarda un tamaño; "Guardar ICO multi-tamaño" crea un único .ico con varios tamaños (entradas PNG con alfa).
 - WEBP: admitido para abrir, no para guardar (GDI+ no soporta guardado WEBP nativo).
+- SVG: admitido para abrir (renderiza a PNG 512×512 via SkiaSharp.Svg), no para guardar.
 - DPI y diseñador: el proyecto usa .NET 8 y `SystemAware` para High DPI. Si el diseñador muestra avisos en monitores con escalado >100%, puedes abrirlo en modo DPI-unaware.
 
 ## Licencia
