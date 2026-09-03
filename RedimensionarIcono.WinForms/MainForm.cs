@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 using RedimensionarIcono.WinForms.Services;
 using RedimensionarIcono.WinForms.Dialogs;
+using SkiaSharp;
 
 namespace RedimensionarIcono.WinForms
 {
@@ -54,15 +55,21 @@ namespace RedimensionarIcono.WinForms
             using var dlg = new OpenFileDialog
             {
                 Title = "Seleccionar imagen",
-                Filter = "Imágenes|*.png;*.jpg;*.jpeg;*.webp;*.bmp;*.gif|Todos los archivos|*.*"
+                Filter = "Imágenes|*.png;*.jpg;*.jpeg;*.webp;*.bmp;*.gif;*.svg|Todos los archivos|*.*"
             };
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 try
                 {
                     _original?.Dispose();
-                    using var loaded = new Bitmap(dlg.FileName);
-                    _original = new Bitmap(loaded);
+                    var ext = Path.GetExtension(dlg.FileName).ToLowerInvariant();
+                    if (ext == ".svg")
+                        _original = SvgToBitmap(dlg.FileName, 512);
+                    else
+                    {
+                        using var loaded = new Bitmap(dlg.FileName);
+                        _original = new Bitmap(loaded);
+                    }
                     pbPreview.Image = new Bitmap(_original);
                     // Sugerir nombre base desde archivo
                     try
@@ -283,7 +290,7 @@ namespace RedimensionarIcono.WinForms
 
         private static bool EsImagen(string path)
         {
-            string[] exts = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp" };
+            string[] exts = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp", ".svg" };
             var ext = Path.GetExtension(path).ToLowerInvariant();
             return exts.Contains(ext);
         }
@@ -291,10 +298,36 @@ namespace RedimensionarIcono.WinForms
         private void CargarImagenDesdeRuta(string path)
         {
             _original?.Dispose();
-            using var loaded = new Bitmap(path);
-            _original = new Bitmap(loaded);
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+            if (ext == ".svg")
+                _original = SvgToBitmap(path, 512);
+            else
+            {
+                using var loaded = new Bitmap(path);
+                _original = new Bitmap(loaded);
+            }
             pbPreview.Image = new Bitmap(_original);
             ToggleActions(true);
+        }
+
+        private static Bitmap SvgToBitmap(string svgPath, int maxSize)
+        {
+            var svg = new SkiaSharp.Extended.Svg.SKSvg();
+            svg.Load(svgPath);
+            var rect = svg.Picture.CullRect;
+            float scale = Math.Min(maxSize / rect.Width, maxSize / rect.Height);
+            int w = (int)(rect.Width * scale);
+            int h = (int)(rect.Height * scale);
+            var info = new SKImageInfo(w, h);
+            using var surface = SKSurface.Create(info);
+            var canvas = surface.Canvas;
+            canvas.Clear(SKColors.Transparent);
+            canvas.Scale(scale);
+            canvas.DrawPicture(svg.Picture);
+            using var image = surface.Snapshot();
+            using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+            using var ms = new MemoryStream(data.ToArray());
+            return new Bitmap(ms);
         }
 
         // --- ICO multi-res ---
