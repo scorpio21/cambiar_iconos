@@ -1,0 +1,83 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        runtime: [win-x64, win-x86]
+        selfcontained: ['true', 'false']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Determine version
+      id: version
+      run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $env:GITHUB_OUTPUT
+
+    - name: Determine suffix
+      id: suffix
+      run: |
+        if ("${{ matrix.selfcontained }}" -eq "true") {
+          echo "SUFFIX=selfcontained" >> $env:GITHUB_OUTPUT
+        } else {
+          echo "SUFFIX=framework" >> $env:GITHUB_OUTPUT
+        }
+
+    - name: Publish
+      run: |
+        dotnet publish RedimensionarIcono.WinForms/RedimensionarIcono.WinForms.csproj `
+          -c Release `
+          -r ${{ matrix.runtime }} `
+          --self-contained ${{ matrix.selfcontained }} `
+          -p:PublishSingleFile=false `
+          -o publish/${{ matrix.runtime }}-${{ steps.suffix.outputs.SUFFIX }}
+
+    - name: Zip
+      run: |
+        $zipName = "RedimensionarIcono.WinForms-v${{ steps.version.outputs.VERSION }}-${{ matrix.runtime }}-${{ steps.suffix.outputs.SUFFIX }}.zip"
+        Compress-Archive -Path "publish/${{ matrix.runtime }}-${{ steps.suffix.outputs.SUFFIX }}/*" -DestinationPath "publish/$zipName"
+        echo "ZIP_NAME=$zipName" >> $env:GITHUB_OUTPUT
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: RedimensionarIcono-${{ matrix.runtime }}-${{ steps.suffix.outputs.SUFFIX }}
+        path: publish/*.zip
+
+  release:
+    needs: build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        merge-multiple: true
+
+    - name: Determine version
+      id: version
+      run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $env:GITHUB_OUTPUT
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: v${{ steps.version.outputs.VERSION }}
+        draft: false
+        prerelease: false
+        generate_release_notes: false
+        files: artifacts/*.zip
