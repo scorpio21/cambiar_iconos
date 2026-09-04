@@ -16,6 +16,7 @@ namespace RedimensionarIcono.WinForms
         private Bitmap? _lastResized;
         private readonly int[] _sizes = new[] { 16, 20, 24, 32, 36, 48, 72, 96, 120, 144, 152, 167, 180, 192, 256, 384, 512 };
         private Color _bgColor = Color.White;
+        private Label? _dropOverlay;
 
         public MainForm()
         {
@@ -37,6 +38,7 @@ namespace RedimensionarIcono.WinForms
                 MakeTransparentOn(chkTransparent, pictureBox1);
                 pictureBox1.SendToBack();
             }
+            InitDropOverlay();
         }
 
         private void ToggleActions(bool enabled)
@@ -266,14 +268,21 @@ namespace RedimensionarIcono.WinForms
                 if (files.Length > 0 && EsImagen(files[0]))
                 {
                     e.Effect = DragDropEffects.Copy;
+                    ShowDropOverlay(true);
                     return;
                 }
             }
             e.Effect = DragDropEffects.None;
         }
 
+        private void MainForm_DragLeave(object? sender, EventArgs e)
+        {
+            ShowDropOverlay(false);
+        }
+
         private void MainForm_DragDrop(object? sender, DragEventArgs e)
         {
+            ShowDropOverlay(false);
             try
             {
                 var files = (string[])(e.Data?.GetData(DataFormats.FileDrop) ?? Array.Empty<string>());
