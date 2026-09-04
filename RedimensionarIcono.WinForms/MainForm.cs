@@ -16,7 +16,8 @@ namespace RedimensionarIcono.WinForms
         private Bitmap? _lastResized;
         private readonly int[] _sizes = new[] { 16, 20, 24, 32, 36, 48, 72, 96, 120, 144, 152, 167, 180, 192, 256, 384, 512 };
         private Color _bgColor = Color.White;
-        private Label? _dropOverlay;
+        private Panel? _dropOverlay;
+
 
         public MainForm()
         {

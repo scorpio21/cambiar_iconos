@@ -43,44 +43,59 @@ namespace RedimensionarIcono.WinForms
         // --- Drag & Drop overlay ---
 
         /// <summary>
-        /// Crea el label overlay que aparece al arrastrar una imagen válida sobre la ventana.
-        /// Se posiciona sobre pbPreview y permanece oculto por defecto.
+        /// Crea el panel overlay que aparece al arrastrar una imagen válida.
+        /// Usa Panel + Paint manual para que el texto y el fondo sean siempre visibles
+        /// (Label con Enabled=false aplica color de sistema encima de ForeColor).
         /// </summary>
         private void InitDropOverlay()
         {
-            _dropOverlay = new Label
+            _dropOverlay = new Panel
             {
-                Text = "🖼️  Suelta aquí",
-                TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font("Segoe UI", 16f, FontStyle.Bold),
-                ForeColor = Color.White,
-                BackColor = Color.FromArgb(210, 30, 30, 60),
-                Visible = false,
+                Visible  = false,
                 AutoSize = false,
-                Enabled = false,   // pasar eventos de ratón al Form
-                Cursor  = Cursors.Default,
+                Cursor   = Cursors.Default,
+                // Sin AllowDrop: los eventos de arrastre suben al Form
             };
 
-            // Borde punteado decorativo
             _dropOverlay.Paint += (s, pe) =>
             {
+                var g  = pe.Graphics;
+                g.SmoothingMode    = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+
                 var rc = _dropOverlay.ClientRectangle;
-                rc.Inflate(-8, -8);
-                using var pen = new System.Drawing.Pen(Color.White, 2f);
-                pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                pe.Graphics.DrawRectangle(pen, rc);
+
+                // Fondo oscuro sólido navy
+                using (var bg = new SolidBrush(Color.FromArgb(45, 45, 90)))
+                    g.FillRectangle(bg, rc);
+
+                // Borde punteado blanco con margen interior
+                var brc = rc;
+                brc.Inflate(-8, -8);
+                using (var pen = new System.Drawing.Pen(Color.White, 2f))
+                {
+                    pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                    g.DrawRectangle(pen, brc);
+                }
+
+                // Texto centrado en blanco
+                using var font  = new Font("Segoe UI", 16f, FontStyle.Bold, GraphicsUnit.Point);
+                using var brush = new SolidBrush(Color.White);
+                var sf = new StringFormat
+                {
+                    Alignment     = StringAlignment.Center,
+                    LineAlignment = StringAlignment.Center,
+                };
+                g.DrawString("🖼️  Suelta aquí", font, brush, (RectangleF)rc, sf);
             };
 
             Controls.Add(_dropOverlay);
 
-            // Suscribir DragLeave
             DragLeave += MainForm_DragLeave;
-
-            // Reposicionar si la ventana cambia de tamaño
-            Resize += (s, ev) => PositionDropOverlay();
+            Resize    += (s, ev) => PositionDropOverlay();
         }
 
-        /// <summary>Muestra u oculta el overlay ajustando su posición sobre pbPreview.</summary>
+        /// <summary>Muestra u oculta el overlay posicionado sobre pbPreview.</summary>
         private void ShowDropOverlay(bool show)
         {
             if (_dropOverlay == null) return;
@@ -89,6 +104,7 @@ namespace RedimensionarIcono.WinForms
                 PositionDropOverlay();
                 _dropOverlay.BringToFront();
                 _dropOverlay.Visible = true;
+                _dropOverlay.Invalidate(); // forzar repintado
             }
             else
             {
@@ -96,7 +112,7 @@ namespace RedimensionarIcono.WinForms
             }
         }
 
-        /// <summary>Posiciona el overlay exactamente sobre pbPreview con un pequeño margen.</summary>
+        /// <summary>Posiciona el overlay exactamente sobre pbPreview con un margen interior.</summary>
         private void PositionDropOverlay()
         {
             if (_dropOverlay == null || pbPreview == null) return;
@@ -110,4 +126,3 @@ namespace RedimensionarIcono.WinForms
         }
     }
 }
-
