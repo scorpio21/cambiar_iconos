@@ -80,7 +80,7 @@ namespace RedimensionarIcono.WinForms
 
                 // Texto centrado en blanco
                 using var font  = new Font("Segoe UI", 16f, FontStyle.Bold, GraphicsUnit.Point);
-                using var brush = new SolidBrush(Color.White);
+                using var brush = new SolidBrush(Color.Blue);
                 var sf = new StringFormat
                 {
                     Alignment     = StringAlignment.Center,
@@ -123,6 +123,30 @@ namespace RedimensionarIcono.WinForms
             var local = PointToClient(loc);
             _dropOverlay.Location = new Point(local.X + margin, local.Y + margin);
             _dropOverlay.Size     = new Size(pbPreview.Width - margin * 2, pbPreview.Height - margin * 2);
+        }
+
+        /// <summary>
+        /// Suscribe DragEnter / DragLeave / DragDrop en todos los controles
+        /// hijos del form de forma recursiva. Así el overlay aparece en cuanto
+        /// el drag entra en CUALQUIER zona de la ventana, no solo en el Form vacío.
+        /// </summary>
+        internal void SubscribeDragEventsToAllControls(Control parent)
+        {
+            foreach (Control ctrl in parent.Controls)
+            {
+                // El propio overlay ya tiene AllowDrop=false a propósito
+                // (para que sus eventos suban al Form). No re-suscribir.
+                if (ctrl == _dropOverlay) continue;
+
+                ctrl.AllowDrop  = true;
+                ctrl.DragEnter += MainForm_DragEnter;
+                ctrl.DragDrop  += MainForm_DragDrop;
+                ctrl.DragLeave += MainForm_DragLeave;
+
+                // Recursivo en hijos
+                if (ctrl.HasChildren)
+                    SubscribeDragEventsToAllControls(ctrl);
+            }
         }
     }
 }

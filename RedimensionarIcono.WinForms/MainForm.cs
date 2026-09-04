@@ -278,7 +278,10 @@ namespace RedimensionarIcono.WinForms
 
         private void MainForm_DragLeave(object? sender, EventArgs e)
         {
-            ShowDropOverlay(false);
+            // Solo ocultar si el cursor salió realmente del Form,
+            // no cuando simplemente pasó sobre un control hijo.
+            if (!ClientRectangle.Contains(PointToClient(Cursor.Position)))
+                ShowDropOverlay(false);
         }
 
         private void MainForm_DragDrop(object? sender, DragEventArgs e)
@@ -516,6 +519,9 @@ namespace RedimensionarIcono.WinForms
             }
             // Cargar icono guardado (servicio)
             IconService.LoadAndApplySavedIcon(this, pbMobile);
+            // Suscribir drag-and-drop a todos los controles hijos para que
+            // el overlay aparezca en cuanto el cursor entra a la ventana.
+            SubscribeDragEventsToAllControls(this);
         }
 
 
