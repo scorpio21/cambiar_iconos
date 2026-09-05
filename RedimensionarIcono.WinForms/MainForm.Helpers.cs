@@ -44,8 +44,7 @@ namespace RedimensionarIcono.WinForms
 
         /// <summary>
         /// Crea el panel overlay que aparece al arrastrar una imagen válida.
-        /// Usa Panel + Paint manual para que el texto y el fondo sean siempre visibles
-        /// (Label con Enabled=false aplica color de sistema encima de ForeColor).
+        /// Usa Panel + Paint manual para control total del color y texto.
         /// </summary>
         private void InitDropOverlay()
         {
@@ -54,13 +53,13 @@ namespace RedimensionarIcono.WinForms
                 Visible  = false,
                 AutoSize = false,
                 Cursor   = Cursors.Default,
-                // Sin AllowDrop: los eventos de arrastre suben al Form
+                // AllowDrop=false: los eventos de arrastre pasan al Form
             };
 
             _dropOverlay.Paint += (s, pe) =>
             {
                 var g  = pe.Graphics;
-                g.SmoothingMode    = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                g.SmoothingMode     = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
                 var rc = _dropOverlay.ClientRectangle;
@@ -80,17 +79,23 @@ namespace RedimensionarIcono.WinForms
 
                 // Texto centrado en blanco
                 using var font  = new Font("Segoe UI", 16f, FontStyle.Bold, GraphicsUnit.Point);
-                using var brush = new SolidBrush(Color.Blue);
+                using var brush = new SolidBrush(Color.White);
                 var sf = new StringFormat
                 {
                     Alignment     = StringAlignment.Center,
                     LineAlignment = StringAlignment.Center,
                 };
-                g.DrawString("🖼️  Suelta aquí", font, brush, (RectangleF)rc, sf);
+                g.DrawString("Suelta aquí", font, brush, (RectangleF)rc, sf);
             };
 
             Controls.Add(_dropOverlay);
 
+            // Suscribir eventos del Form:
+            // - DragOver: dispara CONTINUAMENTE mientras el cursor esté sobre la
+            //   ventana, incluso sobre controles hijo con AllowDrop=false.
+            //   Es el trigger más fiable para mantener el overlay visible.
+            // - DragLeave: ocultar si el cursor salió del form.
+            DragOver  += MainForm_DragOver;
             DragLeave += MainForm_DragLeave;
             Resize    += (s, ev) => PositionDropOverlay();
         }
@@ -104,7 +109,7 @@ namespace RedimensionarIcono.WinForms
                 PositionDropOverlay();
                 _dropOverlay.BringToFront();
                 _dropOverlay.Visible = true;
-                _dropOverlay.Invalidate(); // forzar repintado
+                _dropOverlay.Invalidate();
             }
             else
             {
@@ -123,30 +128,6 @@ namespace RedimensionarIcono.WinForms
             var local = PointToClient(loc);
             _dropOverlay.Location = new Point(local.X + margin, local.Y + margin);
             _dropOverlay.Size     = new Size(pbPreview.Width - margin * 2, pbPreview.Height - margin * 2);
-        }
-
-        /// <summary>
-        /// Suscribe DragEnter / DragLeave / DragDrop en todos los controles
-        /// hijos del form de forma recursiva. Así el overlay aparece en cuanto
-        /// el drag entra en CUALQUIER zona de la ventana, no solo en el Form vacío.
-        /// </summary>
-        internal void SubscribeDragEventsToAllControls(Control parent)
-        {
-            foreach (Control ctrl in parent.Controls)
-            {
-                // El propio overlay ya tiene AllowDrop=false a propósito
-                // (para que sus eventos suban al Form). No re-suscribir.
-                if (ctrl == _dropOverlay) continue;
-
-                ctrl.AllowDrop  = true;
-                ctrl.DragEnter += MainForm_DragEnter;
-                ctrl.DragDrop  += MainForm_DragDrop;
-                ctrl.DragLeave += MainForm_DragLeave;
-
-                // Recursivo en hijos
-                if (ctrl.HasChildren)
-                    SubscribeDragEventsToAllControls(ctrl);
-            }
         }
     }
 }

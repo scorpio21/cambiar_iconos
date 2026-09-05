@@ -276,10 +276,28 @@ namespace RedimensionarIcono.WinForms
             e.Effect = DragDropEffects.None;
         }
 
+        // DragOver se dispara continuamente mientras el cursor está sobre el
+        // form, aunque pase por controles hijo con AllowDrop=false.
+        // Es el trigger más fiable para mantener el overlay visible.
+        private void MainForm_DragOver(object? sender, DragEventArgs e)
+        {
+            if (e.Data != null && e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                var files = (string[])(e.Data.GetData(DataFormats.FileDrop) ?? Array.Empty<string>());
+                if (files.Length > 0 && EsImagen(files[0]))
+                {
+                    e.Effect = DragDropEffects.Copy;
+                    if (_dropOverlay?.Visible != true)
+                        ShowDropOverlay(true);
+                    return;
+                }
+            }
+            e.Effect = DragDropEffects.None;
+        }
+
         private void MainForm_DragLeave(object? sender, EventArgs e)
         {
-            // Solo ocultar si el cursor salió realmente del Form,
-            // no cuando simplemente pasó sobre un control hijo.
+            // Solo ocultar si el cursor salió realmente del Form.
             if (!ClientRectangle.Contains(PointToClient(Cursor.Position)))
                 ShowDropOverlay(false);
         }
@@ -511,17 +529,12 @@ namespace RedimensionarIcono.WinForms
         // Evento Load referenciado desde el diseñador
         private void MainForm_Load(object? sender, EventArgs e)
         {
-            // Asegurar que el combo de formatos esté en estado correcto al iniciar
             UpdateFormatOptions();
             if (pictureBox1 != null)
             {
                 pictureBox1.SendToBack();
             }
-            // Cargar icono guardado (servicio)
             IconService.LoadAndApplySavedIcon(this, pbMobile);
-            // Suscribir drag-and-drop a todos los controles hijos para que
-            // el overlay aparezca en cuanto el cursor entra a la ventana.
-            SubscribeDragEventsToAllControls(this);
         }
 
 
